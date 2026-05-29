@@ -231,7 +231,7 @@ select.inp option{background:var(--bg3);color:var(--text)}
     Relatórios
   </button>
   <button class="nav-btn" data-p="config" onclick="go('config')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     Config
   </button>
 </nav>
@@ -515,7 +515,7 @@ async function syncQueue() {
 
   if (erros.length > 0) {
     erros.forEach((e,i) => console.error('Erro '+(i+1)+':', e));
-    toast('⚠️ '+ok+' enviados, '+erros.length+' erros — veja F12', 6000);
+    toast('⚠️ '+ok+' enviados. Erro: ' + erros[0], 8000);
   } else {
     toast('✅ '+ok+' registros enviados!', 4000);
   }
@@ -2513,6 +2513,30 @@ function showModal(html) {
     </div>`;
 }
 function closeModal() { document.getElementById('mc').innerHTML=''; }
+
+// ══════════════════════════════════════════════
+// SINCRONIZAÇÃO AUTOMÁTICA (MOTOR DE FUNDO)
+// ══════════════════════════════════════════════
+setInterval(async () => {
+  // Só tenta sincronizar se estiver online, conectado ao Supabase e logado
+  if (navigator.onLine && S.online && S.currentUser) {
+    console.log('Iniciando sync automático de background...');
+    
+    // Atualiza o visual da rede na tela
+    updateNet();
+    
+    // Envia os dados locais pendentes
+    await syncQueue();
+    
+    // Puxa as novidades da nuvem
+    await loadRemote();
+    
+    // Atualiza a tela sem piscar tudo (só renderiza se estiver nas abas principais)
+    if (S.page !== 'caixa' && S.page !== 'relatorios') {
+       render();
+    }
+  }
+}, 60000); // 60000 milissegundos = 1 minuto
 
 // ══════════════════════════════════════════════
 // INIT
