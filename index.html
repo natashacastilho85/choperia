@@ -174,13 +174,13 @@ select.inp option{background:var(--bg3);color:var(--text)}
   <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);letter-spacing:4px;margin-bottom:8px">🍺 CHOPERIA</div>
   <div style="font-size:13px;color:var(--text2);margin-bottom:32px">Sistema de gestão</div>
   <div style="width:100%;max-width:360px">
-    <div class="fg"><div class="lbl">Usuário</div><input class="inp" id="loginUser" placeholder="seu usuário" autocomplete="username"></div>
+    <div class="fg"><div class="lbl">Utilizador</div><input class="inp" id="loginUser" placeholder="seu utilizador" autocomplete="username"></div>
     <div class="fg"><div class="lbl">Senha</div><input class="inp" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"></div>
-    <div id="loginErr" style="color:var(--red);font-size:12px;margin-bottom:10px;display:none">Usuário ou senha incorretos</div>
+    <div id="loginErr" style="color:var(--red);font-size:12px;margin-bottom:10px;display:none">Utilizador ou senha incorretos</div>
     <button class="btn btn-primary w-full" style="font-size:16px;padding:14px" onclick="doLogin()">Entrar</button>
     <button id="btnCancelarTroca" class="btn btn-ghost w-full mt8" style="display:none" onclick="cancelarTroca()">← Cancelar e voltar</button>
     <div id="primeiroAcesso" style="display:none;margin-top:16px">
-      <div class="alert alert-warn">Nenhum usuário encontrado. Crie o administrador:</div>
+      <div class="alert alert-warn">Nenhum utilizador encontrado. Crie o administrador:</div>
       <div class="fg mt8"><div class="lbl">Nome completo</div><input class="inp" id="adminNome" placeholder="Seu nome"></div>
       <button class="btn btn-success w-full mt8" onclick="criarAdmin()">Criar administrador</button>
     </div>
@@ -188,12 +188,12 @@ select.inp option{background:var(--bg3);color:var(--text)}
 </div>
 
 <div class="topbar">
-  <div class="topbar-logo">🍺 CHOPERIA <span style="font-size:10px;color:var(--text3);font-family:Nunito,sans-serif;letter-spacing:0">v29</span></div>
+  <div class="topbar-logo">🍺 CHOPERIA <span style="font-size:10px;color:var(--text3);font-family:Nunito,sans-serif;letter-spacing:0">v30</span></div>
   <div class="topbar-right">
     <div id="userBadge" style="font-size:11px;color:var(--text2);cursor:pointer;display:none;gap:6px;align-items:center">
       <span id="userNome" style="font-weight:700"></span>
       <button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:10px" onclick="mTrocarSenha()" title="Trocar senha">🔑</button>
-      <button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:10px" onclick="doTrocarUsuario()" title="Trocar usuário">👤↩</button>
+      <button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:10px" onclick="doTrocarUsuario()" title="Trocar utilizador">👤↩</button>
       <button class="btn btn-danger btn-sm" style="padding:3px 8px;font-size:10px" onclick="doLogout()" title="Sair do sistema">Sair</button>
     </div>
     <div class="net-badge">
@@ -222,13 +222,13 @@ select.inp option{background:var(--bg3);color:var(--text)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
     Caixa
   </button>
-  <button class="nav-btn" data-p="relatorios" onclick="go('relatorios')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    Relatórios
-  </button>
   <button class="nav-btn" data-p="financeiro" onclick="go('financeiro')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
     Finanças
+  </button>
+  <button class="nav-btn" data-p="relatorios" onclick="go('relatorios')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Relatórios
   </button>
   <button class="nav-btn" data-p="config" onclick="go('config')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -255,7 +255,7 @@ const S = {
   categorias: [],
   produtos: [],
   comandas: [],
-  itens: {},        // { comanda_id: [item,...] }
+  itens: {},
   caixaSessao: null,
   couvert: { valor: 0, ativo: false },
   catTab: null,
@@ -377,7 +377,6 @@ async function loadRemote() {
 // ══════════════════════════════════════════════
 // UTILS
 // ══════════════════════════════════════════════
-let _uidc = 0;
 function uid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16);
@@ -417,7 +416,7 @@ function groupItens(itens) {
 }
 
 // ══════════════════════════════════════════════
-// USUARIOS E LOG
+// USERS E LOG
 // ══════════════════════════════════════════════
 function lsUsers() { return JSON.parse(localStorage.getItem('ch_users')||'[]'); }
 function lsSaveUsers(arr) { localStorage.setItem('ch_users', JSON.stringify(arr)); }
@@ -518,7 +517,7 @@ async function syncQueue() {
     erros.forEach((e,i) => console.error('Erro '+(i+1)+':', e));
     toast('⚠️ '+ok+' enviados. Erro: ' + erros[0], 8000);
   } else {
-    toast('✅ '+ok+' registros enviados!', 4000);
+    toast('✅ '+ok+' registos enviados!', 4000);
   }
 }
 
@@ -557,7 +556,7 @@ async function criarAdmin() {
     const user = document.getElementById('loginUser')?.value?.trim();
     const pass = document.getElementById('loginPass')?.value;
     if (!nome) { errEl.textContent='Preencha o nome completo'; errEl.style.display='block'; return; }
-    if (!user) { errEl.textContent='Preencha o usuário'; errEl.style.display='block'; return; }
+    if (!user) { errEl.textContent='Preencha o utilizador'; errEl.style.display='block'; return; }
     if (!pass || pass.length < 4) { errEl.textContent='Senha precisa ter pelo menos 4 caracteres'; errEl.style.display='block'; return; }
     errEl.style.display='none';
     const hash = await hashPass(pass);
@@ -583,7 +582,7 @@ async function doLogin() {
     }
     const found = users.find(u => u.usuario === user && u.senha_hash === hash && u.ativo);
     if (found) { err.style.display='none'; await entrar(found); }
-    else { err.textContent='Usuário ou senha incorretos'; err.style.display='block'; }
+    else { err.textContent='Utilizador ou senha incorretos'; err.style.display='block'; }
   } catch(e) { err.textContent = 'Erro ao entrar: ' + e.message; err.style.display='block'; }
 }
 async function entrar(u) {
@@ -592,7 +591,7 @@ async function entrar(u) {
   const badge = document.getElementById('userBadge');
   badge.style.display = 'flex';
   document.getElementById('userNome').textContent = '👤 ' + u.nome;
-  await registrarLog('Login', `Usuário ${u.usuario} entrou no sistema`);
+  await registrarLog('Login', `Utilizador ${u.usuario} entrou no sistema`);
 }
 async function doLogout() {
   if (!await customConfirm('Deseja sair do sistema?', 'Sair', true)) return;
@@ -667,7 +666,7 @@ function updateNet() {
   document.getElementById('ndot').style.background = S.online ? 'var(--green)' : 'var(--red)';
   document.getElementById('nlabel').textContent = S.online ? 'online' : 'offline';
 }
-window.addEventListener('online', async () => { updateNet(); toast('Online! Sincronizando...'); await syncQueue(); await loadRemote(); render(); });
+window.addEventListener('online', async () => { updateNet(); toast('Online! A sincronizar...'); await syncQueue(); await loadRemote(); render(); });
 window.addEventListener('offline', () => { updateNet(); toast('Trabalhando offline'); });
 
 // ══════════════════════════════════════════════
@@ -685,9 +684,9 @@ function render() {
     case 'cardapio':el.innerHTML = pgCardapio(); postCardapio();break;
     case 'estoque': el.innerHTML = pgEstoque();  break;
     case 'caixa':   el.innerHTML = pgCaixa();    postCaixa();  break;
-    case 'config':  el.innerHTML = pgConfig();   postConfig(); break;
-    case 'relatorios': el.innerHTML = pgRelatorios(); postRelatorios(); break;
     case 'financeiro': el.innerHTML = pgFinanceiro(); postFinanceiro(); break;
+    case 'relatorios': el.innerHTML = pgRelatorios(); postRelatorios(); break;
+    case 'config':  el.innerHTML = pgConfig();   postConfig(); break;
   }
 }
 
@@ -1167,7 +1166,7 @@ async function doSaveProd(id) {
 }
 
 // ══════════════════════════════════════════════
-// PAGE: ESTOQUE E CAIXA (OMITIDOS NESTE BLOCO POR ESPAÇO, MAS IDÊNTICOS À V28)
+// PAGE: ESTOQUE E CAIXA
 // ══════════════════════════════════════════════
 function pgEstoque() {
   const q = S.estoqSearch.toLowerCase(); const selCat = S.estoqCat;
@@ -1232,7 +1231,6 @@ async function doMovCaixa() {
   closeModal(); toast('Registrado!'); render();
 }
 async function mFecharCaixa() {
-  const esp = 0; // Simplificado para economizar espaço de visualização no código
   showModal(`<div class="modal-title">Fechar Caixa</div><div class="fg"><div class="lbl">Valor contado no caixa</div><input class="inp" id="cfv" type="number" min="0" step="0.50" placeholder="0,00"></div><div class="fg"><div class="lbl">Observação</div><input class="inp" id="cfo" placeholder="Opcional"></div><div class="flex gap8"><button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button><button class="btn btn-danger flex-1" onclick="doFecharCaixa(0)">Fechar</button></div>`);
 }
 async function doFecharCaixa(esp) {
@@ -1336,13 +1334,285 @@ async function doDelDespesa(id) {
   closeModal(); toast('Despesa excluída'); render();
 }
 
+
 // ══════════════════════════════════════════════
-// RESTANTE DO CÓDIGO (CONFIGURAÇÕES E RELATÓRIOS BÁSICOS)
+// PAGE: CONFIGURAÇÕES E RELATÓRIOS
 // ══════════════════════════════════════════════
-function pgConfig() { return `<div class="sec-title" style="margin-bottom:14px">CONFIGURAÇÕES</div><div class="card"><div class="f800" style="margin-bottom:8px">🔗 Supabase</div><button class="btn btn-ghost w-full" onclick="syncQueue()">⬆️ Forçar Envio para Nuvem</button></div>`; }
-function postConfig() {}
-function pgRelatorios() { return `<div class="sec-hdr"><span class="sec-title">RELATÓRIOS</span></div><div class="empty"><p class="fs12 c-muted">Utilize a aba Finanças para ver o DRE</p></div>`; }
-function postRelatorios() {}
+function pgConfig() {
+  const cv = S.couvert;
+  var _grps = { Mesa:[], Bistro:[] };
+  S.mesas.forEach(function(m){ var c=m.categoria||'Mesa'; if(!_grps[c]) _grps[c]=[]; _grps[c].push(m); });
+  var _secoes = [['Mesa','🪑 Mesas'],['Bistro','☕ Bistrôs']].filter(function(p){ return _grps[p[0]]&&_grps[p[0]].length>0; });
+  var mesaList = '';
+  if (!S.mesas.length) {
+    mesaList = '<p class="fs12 c-muted">Nenhuma mesa</p>';
+  } else {
+    _secoes.forEach(function(pair){
+      var cat=pair[0], label=pair[1];
+      mesaList += '<div style="font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold);margin:12px 0 4px">'+label+'</div>';
+      _grps[cat].forEach(function(m){
+        var _pre = (m.categoria==='Bistro' ? 'Bistrô' : 'Mesa');
+        mesaList += '<div class="li"><div class="flex-1"><span class="f800">' + _pre + ' ' + m.numero + (m.nome ? ' — ' + m.nome : '') + '</span>' + (m.lugares ? ' <span class="fs11 c-muted">· ' + m.lugares + ' lugares</span>' : '') + '</div><button class="btn btn-danger btn-sm btn-icon" data-rmid="' + m.id + '" onclick="doRmMesa(this.dataset.rmid)">🗑</button></div>';
+      });
+    });
+  }
+
+  return `<div class="sec-title" style="margin-bottom:14px">CONFIGURAÇÕES</div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="flex aic jsb" style="margin-bottom:10px">
+        <div class="f800">🎵 Couvert Artístico</div>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:700">
+          <input type="checkbox" id="cvAtivo" ${cv.ativo?'checked':''}> Ativo</label>
+      </div>
+      <div id="cvField" style="${cv.ativo?'':'display:none'}">
+        <div class="lbl">Valor por pessoa (R$)</div>
+        <div class="flex gap8 mt8">
+          <input class="inp flex-1" id="cvValor" type="number" min="0" step="0.50" value="${cv.valor||0}">
+          <button class="btn btn-primary" onclick="doSaveCouvert()">Salvar</button>
+        </div>
+      </div>
+      ${!cv.ativo?'<p class="fs12 c-muted">Ative para cobrar couvert automático nas mesas</p>':''}
+    </div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div class="flex aic jsb" style="margin-bottom:10px">
+        <div class="f800">🪑 Mesas e Bistrôs</div>
+        <div class="flex gap8">
+          <button class="btn btn-ghost btn-sm" onclick="mNovaMesa('Bistro')" style="background:var(--bg3);border-color:var(--gold);color:var(--gold)">+ Bistrô</button>
+          <button class="btn btn-primary btn-sm" onclick="mNovaMesa('Mesa')">+ Mesa</button>
+        </div>
+      </div>
+      ${mesaList}
+    </div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div class="flex aic jsb" style="margin-bottom:10px">
+        <div class="f800">👥 Utilizadores</div>
+        <button class="btn btn-primary btn-sm" onclick="mNovoUsuario()">+ Utilizador</button>
+      </div>
+      <div id="userList"><div class="spin" style="margin:8px auto;display:block;width:18px"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="f800" style="margin-bottom:8px">🔗 Supabase</div>
+      <div class="fs12 c-muted" style="margin-bottom:8px">
+        Status: <span style="color:${S.online?'var(--green)':'var(--red)'}">● ${S.online?'Online':'Offline'}</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doSync()">🔄 Carregar do Supabase</button>
+      <button class="btn btn-primary btn-sm mt8" onclick="syncQueue()">⬆️ Enviar tudo ao Supabase</button>
+    </div>`;
+}
+
+function postConfig() {
+  loadUserList();
+  const el = document.getElementById('cvAtivo');
+  if (el) el.onchange = async e => {
+    document.getElementById('cvField').style.display = e.target.checked ? '' : 'none';
+    if (!e.target.checked) await doSaveCouvertVal(0, false);
+  };
+}
+
+async function loadUserList() {
+  const el = document.getElementById('userList');
+  if (!el) return;
+  const users = lsUsers();
+  if (!users.length) { el.innerHTML = '<p class="fs12 c-muted">Nenhum utilizador</p>'; return; }
+  el.innerHTML = users.map(u => `<div class="li">
+    <div class="flex-1">
+      <div class="f800">${u.nome}</div>
+      <div class="fs11 c-muted">${u.usuario} · ${u.perfil}${!u.ativo?' · <span style="color:var(--red)">inativo</span>':''}</div>
+    </div>
+    ${u.id !== S.currentUser?.id ? `<button class="btn btn-danger btn-sm btn-icon" onclick="toggleUsuario('${u.id}',${u.ativo})">
+      ${u.ativo?'🔒':'🔓'}</button>` : '<span class="badge badge-g">você</span>'}
+  </div>`).join('');
+}
+
+function mNovoUsuario() {
+  showModal(`<div class="modal-title">Novo Utilizador</div>
+    <div class="fg"><div class="lbl">Nome completo *</div><input class="inp" id="unome" placeholder="Ex: Maria Silva"></div>
+    <div class="fg"><div class="lbl">Utilizador (login) *</div><input class="inp" id="ulogin" placeholder="Ex: maria"></div>
+    <div class="fg"><div class="lbl">Senha *</div><input class="inp" type="password" id="usenha" placeholder="Mínimo 4 caracteres"></div>
+    <div class="fg"><div class="lbl">Perfil</div>
+      <select class="inp" id="uperfil">
+        <option value="operador">Operador</option>
+        <option value="admin">Administrador</option>
+      </select></div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doNovoUsuario()">Criar</button>
+    </div>`);
+}
+
+async function doNovoUsuario() {
+  const nome = document.getElementById('unome')?.value?.trim();
+  const usuario = document.getElementById('ulogin')?.value?.trim().toLowerCase();
+  const senha = document.getElementById('usenha')?.value;
+  const perfil = document.getElementById('uperfil')?.value;
+  if (!nome||!usuario||!senha) { toast('Preencha todos os campos'); return; }
+  if (senha.length < 4) { toast('Senha muito curta'); return; }
+  const existing = (lsUsers()).find(u=>u.usuario===usuario);
+  if (existing) { toast('Utilizador já existe'); return; }
+  const hash = await hashPass(senha);
+  const u = { id:uid(), nome, usuario, senha_hash:hash, perfil, ativo:true, created_at:new Date().toISOString() };
+  lsPutUser( u);
+  if (S.online) { try { await sbPost('usuarios', u); }catch(e){} }
+  await registrarLog('Novo utilizador', `${nome} (${usuario}) criado`);
+  closeModal(); toast(`Utilizador "${nome}" criado!`); render();
+}
+
+async function toggleUsuario(id, ativo) {
+  const users = lsUsers();
+  const u = users.find(x=>x.id===id);
+  if (!u) return;
+  u.ativo = !ativo;
+  lsPutUser( u);
+  if (S.online) { try { await sbPatch('usuarios',`id=eq.${id}`,{ativo:u.ativo}); }catch(e){} }
+  toast(u.ativo ? `${u.nome} reativado` : `${u.nome} desativado`);
+  loadUserList();
+}
+
+async function doSaveCouvert() {
+  const val = parseFloat(document.getElementById('cvValor').value||0);
+  await doSaveCouvertVal(val, true);
+}
+async function doSaveCouvertVal(valor, ativo) {
+  const cfg = { id:uid(), valor, ativo, criado_em:new Date().toISOString() };
+  S.couvert = cfg; await idbPut('couvert_config', cfg);
+  if (S.online) { try { await sbPost('couvert_config', cfg); }catch(e){} }
+  toast(ativo ? `Couvert ${fmtR(valor)}/pessoa ativado!` : 'Couvert desativado');
+}
+
+function mNovaMesa(catPreset) {
+  catPreset = catPreset || 'Mesa';
+  var catLabel = catPreset === 'Bistro' ? 'Bistrô' : 'Mesa';
+  showModal(`<div class="modal-title">Novo(a) ${catLabel}</div>
+    <div class="flex gap8">
+      <div class="fg flex-1"><div class="lbl">Número *</div><input class="inp" id="mnum" type="number" min="1" placeholder="Ex: 1"></div>
+      <div class="fg flex-1"><div class="lbl">Lugares</div><input class="inp" id="mlugares" type="number" min="1" placeholder="Ex: 4"></div>
+    </div>
+    <div class="fg" style="display:none"><input type="hidden" id="mcat" value="${catPreset}"></div>
+    <div class="fs12 c-muted" style="margin-bottom:10px">Categoria: <strong>${catLabel}</strong></div>
+    <div class="fg"><div class="lbl">Nome / identificação (opcional)</div><input class="inp" id="mnome" placeholder="Ex: Varanda, VIP..."></div>
+    <div class="flex gap8"><button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button><button class="btn btn-primary flex-1" onclick="doNovaMesa()">Criar</button></div>`);
+}
+async function doNovaMesa() {
+  const num = parseInt(document.getElementById('mnum')?.value);
+  const nome = document.getElementById('mnome')?.value?.trim()||'';
+  const lugares = parseInt(document.getElementById('mlugares')?.value)||0;
+  const categoria = document.getElementById('mcat')?.value||'Mesa';
+  if (!num||num<1) { toast('Digite um número válido'); return; }
+  if (S.mesas.some(m=>m.numero===num && (m.categoria||'Mesa')===categoria)) { await customAlert('Já existe um(a) ' + (categoria==='Bistro'?'Bistrô':'Mesa') + ' com este número.', '🪑'); return; }
+  const mesa = { id:uid(), numero:num, nome, lugares, categoria, ativa:true };
+  S.mesas.push(mesa); S.mesas.sort((a,b)=>a.numero-b.numero);
+  await idbPut('mesas', mesa);
+  if (S.online) { try { await sbPost('mesas', mesa); }catch(e){} }
+  closeModal(); toast(`Mesa ${num} criada!`); render();
+}
+async function doRmMesa(id) {
+  if (getComanda(id)) { toast('Feche a comanda desta mesa primeiro'); return; }
+  const mesa = getMesa(id); if (!mesa) return;
+  mesa.ativa = false; S.mesas = S.mesas.filter(m=>m.id!==id);
+  await idbPut('mesas', mesa);
+  if (S.online) { try { await sbPatch('mesas',`id=eq.${id}`,{ativa:false}); }catch(e){} }
+  toast('Mesa removida'); render();
+}
+async function doSync() {
+  if (!S.online) { toast('Sem conexão'); return; }
+  toast('A sincronizar...'); await syncQueue(); await loadRemote(); render(); toast('Sincronizado! ✓');
+}
+
+function pgRelatorios() {
+  const hoje = new Date().toISOString().slice(0,10);
+  return `
+    <div class="sec-hdr"><span class="sec-title">RELATÓRIOS</span></div>
+    <div class="tabs" id="relTabs">
+      <span class="tab active" data-rel="caixa">💰 Caixa</span>
+      <span class="tab" data-rel="estoque">📦 Estoque</span>
+      <span class="tab" data-rel="log">📋 Log</span>
+    </div>
+    <div class="flex gap8" style="margin-bottom:14px">
+      <div class="flex-1"><div class="lbl">De</div><input class="inp" type="date" id="relDe" value="${hoje}"></div>
+      <div class="flex-1"><div class="lbl">Até</div><input class="inp" type="date" id="relAte" value="${hoje}"></div>
+      <div style="display:flex;align-items:flex-end;gap:6px">
+        <button class="btn btn-primary" onclick="gerarRelatorio()">Gerar</button>
+        <button class="btn btn-ghost no-print" id="btnExport" style="display:none" onclick="exportarRelatorio()">📥</button>
+      </div>
+    </div>
+    <div id="relConteudo"><p class="fs12 c-muted tc" style="padding:30px">Selecione o período e clique em Gerar</p></div>
+  `;
+}
+function postRelatorios() {
+  document.querySelectorAll('#relTabs .tab').forEach(t => {
+    t.onclick = () => {
+      document.querySelectorAll('#relTabs .tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('relConteudo').innerHTML = '<p class="fs12 c-muted tc" style="padding:30px">Selecione o período e clique em Gerar</p>';
+      const btn = document.getElementById('btnExport'); if (btn) btn.style.display='none';
+    };
+  });
+}
+function exportarRelatorio() { window.print(); }
+
+async function gerarRelatorio() {
+  const tipo = document.querySelector('#relTabs .tab.active')?.dataset.rel || 'caixa';
+  const de = document.getElementById('relDe').value;
+  const ate = document.getElementById('relAte').value;
+  if (!de || !ate) { toast('Selecione o período'); return; }
+  const deDate = new Date(de + 'T00:00:00'); const ateDate = new Date(ate + 'T23:59:59');
+  const el = document.getElementById('relConteudo'); el.innerHTML = '<div class="tc" style="padding:20px"><div class="spin"></div></div>';
+  const btnExp = document.getElementById('btnExport'); if (btnExp) btnExp.style.display='flex';
+  if (tipo === 'caixa') await relCaixa(el, deDate, ateDate);
+  else if (tipo === 'estoque') await relEstoque(el, deDate, ateDate);
+  else await relLog(el, deDate, ateDate);
+}
+
+async function relCaixa(el, de, ate) {
+  const allMovs = (await idbAll('caixa_movimentacoes')).filter(m => { const d = new Date(m.created_at); return d >= de && d <= ate; }).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  const allComandas = (await idbAll('comandas')).filter(c => c.status === 'fechada' && c.fechamento_at).filter(c => { const d = new Date(c.fechamento_at); return d >= de && d <= ate; });
+  const allItens = await idbAll('itens_comanda');
+  const entradas = allMovs.filter(m => m.tipo === 'entrada'); const saidas = allMovs.filter(m => m.tipo !== 'entrada');
+  const totalEnt = entradas.reduce((s,m) => s+m.valor, 0); const totalSai = saidas.reduce((s,m) => s+m.valor, 0);
+  const totalLiq = totalEnt - totalSai;
+  const porForma = {}; entradas.forEach(m => { const f = m.forma_pagamento || 'outros'; if (!porForma[f]) porForma[f] = 0; porForma[f] += m.valor; });
+  const nomes = { dinheiro:'💵 Dinheiro', cartao_credito:'💳 Crédito', cartao_debito:'💳 Débito', pix:'📱 Pix', dividido:'👥 Dividido', outros:'Outros' };
+  const formaRows = Object.entries(porForma).sort((a,b) => b[1]-a[1]).map(([f,v]) => `<div class="tr"><span class="c-muted">${nomes[f]||f}</span><span class="f800">${fmtR(v)}</span></div>`).join('');
+  const ticketMedio = allComandas.length ? totalEnt / allComandas.length : 0;
+  const mesasRows = allComandas.sort((a,b)=>new Date(b.fechamento_at)-new Date(a.fechamento_at)).map(c => {
+    const mesa = getMesa(c.mesa_id); const itens = allItens.filter(i => i.comanda_id === c.id); const itensG = groupItens(itens);
+    const itensHtml = itensG.map(i => { const p = getProd(i.produto_id); return `<div class="tr" style="padding:3px 0 3px 12px"><span class="fs12 c-muted">${i.quantidade}x ${p?p.nome:'?'}</span><span class="fs12">${fmtR(i.quantidade*i.preco_unitario)}</span></div>`; }).join('');
+    return `<div style="border-bottom:1px solid var(--border);padding:8px 0"><div class="flex aic jsb" style="cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'"><div><span class="f800">Mesa ${mesa?mesa.numero:'?'}${c.nome_cliente?' — '+c.nome_cliente:''}</span><span class="fs11 c-muted"> · ${fmtT(c.fechamento_at)} · ${nomes[c.forma_pagamento]||c.forma_pagamento||''}</span></div><span class="c-gold f800">${fmtR(c.total)} ▾</span></div><div style="display:none">${itensHtml||'<p class="fs11 c-muted" style="padding:4px 12px">Sem itens</p>'}</div></div>`;
+  }).join('');
+  el.innerHTML = `<div class="card" style="margin-bottom:10px"><div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Resumo</div><div class="tr"><span class="c-green">Total entradas</span><span class="c-green f800">${fmtR(totalEnt)}</span></div><div class="tr"><span class="c-red">Total saídas</span><span class="c-red f800">− ${fmtR(totalSai)}</span></div><div class="tr big"><span>LÍQUIDO</span><span>${fmtR(totalLiq)}</span></div><div class="divider"></div><div class="tr"><span class="c-muted">Mesas fechadas</span><span class="f800">${allComandas.length}</span></div><div class="tr"><span class="c-muted">Ticket médio</span><span class="f800">${fmtR(ticketMedio)}</span></div></div>${formaRows ? `<div class="card" style="margin-bottom:10px"><div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Por forma de pagamento</div>${formaRows}</div>` : ''}${mesasRows ? `<div class="card" style="margin-bottom:10px"><div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Mesas fechadas — clique para ver detalhes</div>${mesasRows}</div>` : ''}<div class="card"><div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Todas as movimentações (${allMovs.length})</div>${!allMovs.length ? '<p class="fs12 c-muted tc">Nenhuma movimentação no período</p>' : allMovs.map(m => `<div class="li"><div class="flex-1"><div class="f700 fs12">${m.descricao||m.tipo}</div><div class="fs11 c-muted">${new Date(m.created_at).toLocaleDateString('pt-BR')} ${fmtT(m.created_at)}${m.forma_pagamento?' · '+m.forma_pagamento:''}</div></div><div style="font-weight:800;color:${m.tipo==='entrada'?'var(--green)':'var(--red)'}">${m.tipo==='entrada'?'+':'−'} ${fmtR(m.valor)}</div></div>`).join('')}</div>`;
+}
+
+async function relEstoque(el, de, ate) {
+  const movs = (await idbAll('movimentacoes_estoque')).filter(m => { const d = new Date(m.created_at); return d >= de && d <= ate; }).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  const baixos = S.produtos.filter(p => p.controla_estoque && p.estoque_minimo > 0 && p.quantidade_estoque <= p.estoque_minimo);
+  const entradas = movs.filter(m => m.tipo === 'entrada'); const desperdicio = movs.filter(m => m.tipo === 'desperdicio'); const consumo = movs.filter(m => m.tipo === 'consumo_proprio');
+  const allComandas = (await idbAll('comandas')).filter(c => c.status === 'fechada' && c.fechamento_at).filter(c => { const d = new Date(c.fechamento_at); return d >= de && d <= ate; });
+  const comandaIds = new Set(allComandas.map(c=>c.id)); const allItens = (await idbAll('itens_comanda')).filter(i => comandaIds.has(i.comanda_id));
+  const vendasMap = {};
+  allItens.forEach(i => { if (!vendasMap[i.produto_id]) vendasMap[i.produto_id] = { qtd:0, total:0 }; vendasMap[i.produto_id].qtd += i.quantidade; vendasMap[i.produto_id].total += i.quantidade * i.preco_unitario; });
+  const vendasRows = Object.entries(vendasMap).sort((a,b) => b[1].qtd - a[1].qtd).map(([pid, v]) => { const p = getProd(pid); return `<div class="tr"><span class="f700">${p?p.nome:pid}</span><span><span class="f800">${v.qtd} ${p?p.unidade||'un':''}</span> <span class="c-muted fs11">· ${fmtR(v.total)}</span></span></div>`; }).join('');
+  const rankingCats = S.categorias.map(cat => {
+    const prods = S.produtos.filter(p => p.categoria_id === cat.id);
+    const ranked = prods.map(p => ({ p, v: vendasMap[p.id] || { qtd:0, total:0 } })).filter(x => x.v.qtd > 0).sort((a,b) => b.v.qtd - a.v.qtd).slice(0,3);
+    if (!ranked.length) return '';
+    const medals = ['🥇','🥈','🥉'];
+    return `<div style="margin-bottom:10px"><div class="fs12 f800" style="color:var(--gold);margin-bottom:4px">${cat.nome}</div>${ranked.map((x,i)=>`<div class="tr" style="padding:3px 0"><span>${medals[i]} ${x.p.nome}</span><span class="f800">${x.v.qtd} ${x.p.unidade||'un'}</span></div>`).join('')}</div>`;
+  }).filter(Boolean).join('');
+  const estoqueRows = S.produtos.filter(p => p.controla_estoque).sort((a,b) => { const aB = a.estoque_minimo > 0 && a.quantidade_estoque <= a.estoque_minimo; const bB = b.estoque_minimo > 0 && b.quantidade_estoque <= b.estoque_minimo; return bB - aB || a.nome.localeCompare(b.nome); }).map(p => {
+    const cor = p.quantidade_estoque <= 0 ? 'var(--red)' : p.quantidade_estoque <= p.estoque_minimo ? 'var(--yellow)' : 'var(--green)';
+    const status = p.quantidade_estoque <= 0 ? '● Zerado' : p.quantidade_estoque <= p.estoque_minimo ? '● Baixo' : '● OK';
+    return `<div class="tr"><span class="f700">${p.nome}</span><span style="color:${cor}">${p.quantidade_estoque} ${p.unidade||'un'} <span class="fs11">${status}</span></span></div>`;
+  }).join('');
+  el.innerHTML = `${baixos.length ? `<div class="alert alert-err" style="margin-bottom:10px">⚠️ ${baixos.length} produto(s) abaixo do mínimo</div>` : ''}${rankingCats ? `<div class="card" style="margin-bottom:10px"><div class="fs11 c-muted f800" style="margin-bottom:10px;letter-spacing:.5px;text-transform:uppercase">🏆 Ranking por categoria</div>${rankingCats}</div>` : ''}${vendasRows ? `<div class="card" style="margin-bottom:10px"><div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Consumo das mesas no período</div>${vendasRows}</div>` : ''}<div class="card" style="margin-bottom:10px"><div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Movimentações manuais</div><div class="tr"><span class="c-muted">Entradas (reposição)</span><span class="f800 c-green">${entradas.length} lançamentos</span></div><div class="tr"><span class="c-muted">Consumo próprio</span><span class="f800">${consumo.length} lançamentos</span></div><div class="tr"><span class="c-muted">Desperdício / perda</span><span class="f800 c-red">${desperdicio.length} lançamentos</span></div></div><div class="card" style="margin-bottom:10px"><div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Estoque atual</div>${estoqueRows || '<p class="fs12 c-muted tc">Nenhum produto com controle de estoque</p>'}</div><div class="card"><div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Histórico manual no período</div>${!movs.length ? '<p class="fs12 c-muted tc">Nenhuma movimentação manual no período</p>' : movs.map(m => { const p = getProd(m.produto_id); const tipoLabel = {entrada:'📦 Entrada', desperdicio:'🗑️ Desperdício', consumo_proprio:'🧉 Consumo', ajuste:'🔧 Ajuste'}[m.tipo]||m.tipo; return `<div class="li"><div class="flex-1"><div class="f700 fs12">${tipoLabel} — ${p?p.nome:'Produto'}</div><div class="fs11 c-muted">${new Date(m.created_at).toLocaleDateString('pt-BR')} ${fmtT(m.created_at)}${m.observacao?' · '+m.observacao:''}</div></div><span class="f800">${m.quantidade} ${p?p.unidade||'un':''}</span></div>`; }).join('')}</div>`;
+}
+
+async function relLog(el, de, ate) {
+  const logs = (lsLog()).filter(l => { const d = new Date(l.created_at); return d >= de && d <= ate; }).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  el.innerHTML = `<div class="card"><div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Log de atividades (${logs.length})</div>${!logs.length ? '<p class="fs12 c-muted tc">Nenhuma atividade no período</p>' : logs.map(l => `<div class="li"><div class="flex-1"><div class="f700 fs12">${l.atividade}</div><div class="fs11 c-muted">${l.detalhes||''}</div></div><div style="text-align:right"><div class="fs11 f800">${l.usuario_nome||''}</div><div class="fs11 c-muted">${new Date(l.created_at).toLocaleDateString('pt-BR')} ${fmtT(l.created_at)}</div></div></div>`).join('')}</div>`;
+}
 
 // ══════════════════════════════════════════════
 // CUSTOM DIALOGS & CORE
@@ -1366,7 +1636,7 @@ function showModal(html) { document.getElementById('mc').innerHTML = `<div class
 function closeModal() { document.getElementById('mc').innerHTML=''; }
 
 // ══════════════════════════════════════════════
-// SINCRONIZAÇÃO AUTOMÁTICA
+// SINCRONIZAÇÃO AUTOMÁTICA E INIT
 // ══════════════════════════════════════════════
 setInterval(async () => {
   if (navigator.onLine && S.online && S.currentUser) {
