@@ -1,0 +1,2578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#120d04">
+<title>🍺 Choperia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #1a4a1b;
+  --bg2:      #1f5820;
+  --bg3:      #265c27;
+  --card:     #1d521e;
+  --border:   #2e7030;
+  --gold:     #e8920a;
+  --gold-lt:  #f5b040;
+  --gold-dk:  #a86308;
+  --text:     #ffffff;
+  --text2:    #c8c8c8;
+  --text3:    #c0c0c0;
+  --green:    #56c464;
+  --red:      #e05050;
+  --yellow:   #f0c040;
+  --blue:     #4090e0;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--bg2);border-bottom:2px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.topbar-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:3px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.net-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);background:var(--bg3);padding:4px 8px;border-radius:20px;border:1px solid var(--border)}
+.net-dot{width:7px;height:7px;border-radius:50%}
+
+/* ── MAIN ── */
+.main{flex:1;padding:14px 14px 84px;overflow-y:auto;max-width:700px;width:100%;margin:0 auto}
+
+/* ── BOTTOM NAV ── */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:2px solid var(--border);display:flex;z-index:100;max-width:700px;margin:0 auto}
+@media(min-width:700px){.bottomnav{left:50%;transform:translateX(-50%);right:auto;width:700px}}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 10px;cursor:pointer;color:var(--text3);font-size:10px;font-weight:700;gap:3px;border:none;background:none;font-family:'Nunito',sans-serif;transition:color .2s}
+.nav-btn.active{color:var(--gold)}
+.nav-btn svg{width:22px;height:22px;stroke-width:1.8}
+
+/* ── SECTION HEADER ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--gold)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.card+.card{margin-top:10px}
+
+/* ── MESA GRID ── */
+.mesas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.mesa-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:14px 10px 12px;text-align:center;cursor:pointer;transition:all .15s;position:relative;user-select:none}
+.mesa-card:active{transform:scale(.96)}
+.mesa-card.ocupada{border-color:var(--gold);background:#231900}
+.mesa-card.alerta{border-color:var(--red)}
+.mesa-num{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1}
+.mesa-label{font-size:11px;color:var(--text3);margin-top:2px;font-weight:700}
+.mesa-extra{font-size:12px;color:var(--text2);margin-top:4px}
+.mesa-total{font-size:17px;font-weight:800;color:var(--text);margin-top:4px}
+.couvert-pip{position:absolute;top:8px;right:8px;background:var(--gold);color:#1a0e00;font-size:8px;font-weight:800;padding:2px 5px;border-radius:4px;letter-spacing:.5px}
+
+/* ── BUTTONS ── */
+.btn{padding:10px 16px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--gold);color:#180e00}
+.btn-primary:hover{background:var(--gold-lt)}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.btn-danger{background:#3d1212;color:#ff7070;border:1px solid #5a1c1c}
+.btn-success{background:#123d14;color:#70e070;border:1px solid #1c5a1e}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.btn-icon{padding:7px;border-radius:8px}
+.w-full{width:100%}
+.flex-1{flex:1}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:22px 22px 0 0;width:100%;max-width:660px;max-height:92vh;overflow-y:auto;padding:20px 18px 28px}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:1.5px;margin-bottom:14px}
+
+/* ── FORM ── */
+.fg{margin-bottom:12px}
+.lbl{display:block;font-size:11px;font-weight:800;color:var(--text2);margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase}
+.inp{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;outline:none;transition:border .15s}
+.inp:focus{border-color:var(--gold)}
+select.inp option{background:var(--bg3);color:var(--text)}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:10px 0}
+
+/* ── LIST ITEMS ── */
+.li{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.li:last-child{border-bottom:none}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif}
+.tab.active{background:var(--gold);color:#180e00;border-color:var(--gold)}
+
+/* ── TOTAL ROWS ── */
+.tr{display:flex;justify-content:space-between;align-items:center;padding:7px 0}
+.tr.big{font-size:20px;font-weight:800;color:var(--gold);border-top:1px solid var(--border);margin-top:6px;padding-top:12px}
+
+/* ── PAYMENT ── */
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.pay-btn{padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--card);color:var(--text2);font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer;transition:all .15s;text-align:center}
+.pay-btn.sel{border-color:var(--gold);background:#2a1900;color:var(--gold)}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.3px}
+.badge-g{background:#0d2e10;color:#70e070}
+.badge-r{background:#2e0d0d;color:#ff7070}
+.badge-y{background:#2e2a0d;color:#f0c040}
+.badge-gray{background:var(--bg3);color:var(--text2)}
+
+/* ── STOCK BAR ── */
+.sbar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:4px}
+.sbar-fill{height:100%;border-radius:2px;transition:width .3s}
+
+/* ── ALERT ── */
+.alert{padding:10px 14px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:12px}
+.alert-warn{background:#2e2208;border:1px solid #4a380e;color:#f0c040}
+.alert-err{background:#2e0e0e;border:1px solid #4a1a1a;color:#ff8080}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-icon{font-size:48px;margin-bottom:10px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;z-index:400;white-space:nowrap;animation:tin .25s,tout .3s 2.4s forwards;pointer-events:none}
+@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes tout{to{opacity:0;transform:translateX(-50%) translateY(8px)}}
+
+/* ── QTY CTRL ── */
+.qc{display:flex;align-items:center;gap:8px}
+.qbtn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Nunito',sans-serif}
+.qval{font-size:16px;font-weight:800;min-width:32px;text-align:center}
+
+/* ── SPINNER ── */
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── PRINT ── */
+@media print {
+  .bottomnav, .topbar, .btn, .tabs, input, select, .alert { display: none !important; }
+  body { background: white !important; color: black !important; font-size: 12px; }
+  .card { border: 1px solid #ccc !important; background: white !important; break-inside: avoid; }
+  .main { padding: 0 !important; }
+  .sec-title, .modal-title { color: #333 !important; }
+  .c-gold, .c-green, .c-red { color: #333 !important; }
+  #printArea { display: block !important; }
+  .no-print { display: none !important; }
+}
+
+/* utils */
+.flex{display:flex}.gap8{gap:8px}.gap10{gap:10px}.aic{align-items:center}.jsb{justify-content:space-between}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+.f700{font-weight:700}.f800{font-weight:800}.fs12{font-size:12px}.fs11{font-size:11px}
+.tc{text-align:center}.tr-txt{text-align:right}
+.c-muted{color:var(--text3)}.c-gold{color:var(--gold)}.c-green{color:var(--green)}.c-red{color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);letter-spacing:4px;margin-bottom:8px">🍺 CHOPERIA</div>
+  <div style="font-size:13px;color:var(--text2);margin-bottom:32px">Sistema de gestão</div>
+  <div style="width:100%;max-width:360px">
+    <div class="fg"><div class="lbl">Usuário</div><input class="inp" id="loginUser" placeholder="seu usuário" autocomplete="username"></div>
+    <div class="fg"><div class="lbl">Senha</div><input class="inp" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"></div>
+    <div id="loginErr" style="color:var(--red);font-size:12px;margin-bottom:10px;display:none">Usuário ou senha incorretos</div>
+    <button class="btn btn-primary w-full" style="font-size:16px;padding:14px" onclick="doLogin()">Entrar</button>
+    <button id="btnCancelarTroca" class="btn btn-ghost w-full mt8" style="display:none" onclick="cancelarTroca()">← Cancelar e voltar</button>
+    <div id="primeiroAcesso" style="display:none;margin-top:16px">
+      <div class="alert alert-warn">Nenhum usuário encontrado. Crie o administrador:</div>
+      <div class="fg mt8"><div class="lbl">Nome completo</div><input class="inp" id="adminNome" placeholder="Seu nome"></div>
+      <button class="btn btn-success w-full mt8" onclick="criarAdmin()">Criar administrador</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">🍺 CHOPERIA <span style="font-size:10px;color:var(--text3);font-family:Nunito,sans-serif;letter-spacing:0">v28</span></div>
+  <div class="topbar-right">
+    <div id="userBadge" style="font-size:11px;color:var(--text2);cursor:pointer;display:none;gap:6px;align-items:center">
+      <span id="userNome" style="font-weight:700"></span>
+      <button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:10px" onclick="mTrocarSenha()" title="Trocar senha">🔑</button>
+      <button class="btn btn-ghost btn-sm" style="padding:3px 8px;font-size:10px" onclick="doTrocarUsuario()" title="Trocar usuário">👤↩</button>
+      <button class="btn btn-danger btn-sm" style="padding:3px 8px;font-size:10px" onclick="doLogout()" title="Sair do sistema">Sair</button>
+    </div>
+    <div class="net-badge">
+      <div class="net-dot" id="ndot" style="background:var(--red)"></div>
+      <span id="nlabel">offline</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="app"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottomnav">
+  <button class="nav-btn active" data-p="mesas" onclick="go('mesas')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    Mesas
+  </button>
+  <button class="nav-btn" data-p="cardapio" onclick="go('cardapio')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+    Cardápio
+  </button>
+  <button class="nav-btn" data-p="estoque" onclick="go('estoque')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 3H8l-2 4h12z"/></svg>
+    Estoque
+  </button>
+  <button class="nav-btn" data-p="caixa" onclick="go('caixa')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    Caixa
+  </button>
+  <button class="nav-btn" data-p="relatorios" onclick="go('relatorios')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Relatórios
+  </button>
+  <button class="nav-btn" data-p="config" onclick="go('config')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Config
+  </button>
+</nav>
+
+<!-- MODAL CONTAINER -->
+<div id="mc"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════
+const SB_URL = 'https://shcmwogxctqsbmefzvmx.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoY213b2d4Y3Rxc2JtZWZ6dm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODMxNTEsImV4cCI6MjA5NTU1OTE1MX0.4Kb6BOBsozIXzJ4klZwt5jvPzVz0fnxO4QnR-wqlv-4';
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+const S = {
+  page: 'mesas',
+  online: false,
+  mesas: [],
+  categorias: [],
+  produtos: [],
+  comandas: [],
+  itens: {},        // { comanda_id: [item,...] }
+  caixaSessao: null,
+  couvert: { valor: 0, ativo: false },
+  catTab: null,
+  estoqSearch: '',
+  estoqCat: null,
+  currentUser: null,
+};
+
+// ══════════════════════════════════════════════
+// INDEXEDDB
+// ══════════════════════════════════════════════
+let IDB;
+function idbInit() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('choperia_db', 2);
+    r.onupgradeneeded = e => {
+      const d = e.target.result;
+      ['mesas','categorias','produtos','comandas','itens_comanda',
+       'movimentacoes_estoque','caixa_sessoes','caixa_movimentacoes','couvert_config'].forEach(s => {
+        if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath: 'id' });
+      });
+    };
+    r.onsuccess = e => { IDB = e.target.result; res(); };
+    r.onerror = rej;
+  });
+}
+function idbAll(store) {
+  return new Promise((res, rej) => {
+    const r = IDB.transaction(store,'readonly').objectStore(store).getAll();
+    r.onsuccess = () => res(r.result);
+    r.onerror = rej;
+  });
+}
+function idbPut(store, obj) {
+  return new Promise((res, rej) => {
+    const r = IDB.transaction(store,'readwrite').objectStore(store).put(obj);
+    r.onsuccess = res; r.onerror = rej;
+  });
+}
+function idbDel(store, id) {
+  return new Promise((res, rej) => {
+    const r = IDB.transaction(store,'readwrite').objectStore(store).delete(id);
+    r.onsuccess = res; r.onerror = rej;
+  });
+}
+
+// ══════════════════════════════════════════════
+// SUPABASE REST API
+// ══════════════════════════════════════════════
+function sbH() {
+  return { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+           'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+}
+async function sbGet(t, q='') {
+  const r = await fetch(`${SB_URL}/rest/v1/${t}?${q}`, { headers: sbH() });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbPost(t, d) {
+  const r = await fetch(`${SB_URL}/rest/v1/${t}`, { method:'POST', headers:sbH(), body:JSON.stringify(d) });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbPatch(t, f, d) {
+  const r = await fetch(`${SB_URL}/rest/v1/${t}?${f}`, { method:'PATCH', headers:sbH(), body:JSON.stringify(d) });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbDel(t, f) {
+  const r = await fetch(`${SB_URL}/rest/v1/${t}?${f}`, { method:'DELETE', headers:sbH() });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+// ══════════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════════
+async function loadLocal() {
+  S.mesas = (await idbAll('mesas')).filter(m => m.ativa).sort((a,b) => a.numero-b.numero);
+  S.categorias = (await idbAll('categorias')).sort((a,b) => (a.ordem||0)-(b.ordem||0));
+  S.produtos = (await idbAll('produtos')).filter(p => p.ativo).sort((a,b) => a.nome.localeCompare(b.nome));
+  S.comandas = (await idbAll('comandas')).filter(c => c.status==='aberta');
+  const allItens = await idbAll('itens_comanda');
+  S.itens = {};
+  allItens.forEach(i => { if (!S.itens[i.comanda_id]) S.itens[i.comanda_id]=[]; S.itens[i.comanda_id].push(i); });
+  const cv = (await idbAll('couvert_config')).sort((a,b) => new Date(b.criado_em)-new Date(a.criado_em));
+  if (cv[0]) S.couvert = cv[0];
+  const sess = (await idbAll('caixa_sessoes')).filter(s => s.status==='aberta');
+  S.caixaSessao = sess[0] || null;
+}
+async function loadRemote() {
+  if (!S.online) return;
+  try {
+    console.log('Carregando do Supabase...');
+    const [mesas, cats, prods, comds, cv, sess] = await Promise.all([
+      sbGet('mesas','ativa=eq.true&order=numero'),
+      sbGet('categorias','order=ordem'),
+      sbGet('produtos','ativo=eq.true&order=nome'),
+      sbGet('comandas','status=eq.aberta&order=abertura_at'),
+      sbGet('couvert_config','order=criado_em.desc&limit=1'),
+      sbGet('caixa_sessoes','status=eq.aberta&order=abertura_at.desc&limit=1'),
+    ]);
+    // Only overwrite local if Supabase has data (avoid wiping local with empty remote)
+    if (mesas.length > 0) { S.mesas = mesas; for (const m of mesas) await idbPut('mesas', m); }
+    if (cats.length > 0) { S.categorias = cats; for (const c of cats) await idbPut('categorias', c); }
+    if (prods.length > 0) { S.produtos = prods; for (const p of prods) await idbPut('produtos', p); }
+    // Comandas: usa Supabase se tiver dados, senão mantém local
+    if (comds.length > 0) {
+      S.comandas = comds;
+      for (const c of comds) {
+        await idbPut('comandas', c);
+        const itens = await sbGet('itens_comanda', 'comanda_id=eq.'+c.id+'&order=created_at');
+        S.itens[c.id] = itens;
+        for (const i of itens) await idbPut('itens_comanda', i);
+      }
+    }
+    // Sempre atualiza couvert e caixa
+    S.couvert = cv[0]||{valor:0,ativo:false};
+    S.caixaSessao = sess[0]||null;
+  } catch(e) { console.error('Sync error:', e); toast('Aviso: erro ao sincronizar — ' + e.message); }
+}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+let _uidc = 0;
+function uid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16);
+  });
+}
+function fmtR(v) { return 'R$ ' + Number(v||0).toFixed(2).replace('.',','); }
+function fmtT(dt) { if(!dt) return ''; const d=new Date(dt); return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function elapsed(dt) {
+  if (!dt) return '';
+  const m = Math.floor((Date.now()-new Date(dt))/60000);
+  if (m < 60) return m+'min';
+  const h = Math.floor(m/60), mm = m%60;
+  return h+'h'+(mm>0?String(mm).padStart(2,'0'):'');
+}
+function toast(msg, ms=3000) {
+  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), ms+300);
+}
+function getProd(id) { return S.produtos.find(p=>p.id===id); }
+function getMesa(id) { return S.mesas.find(m=>m.id===id); }
+function getComanda(mesaId) { return S.comandas.find(c=>c.mesa_id===mesaId); }
+function comandaTotal(cid) {
+  const itens = S.itens[cid]||[];
+  const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+  const c = S.comandas.find(x=>x.id===cid);
+  const cv = c ? (c.couvert_valor||0)*(c.couvert_quantidade||0) : 0;
+  return sub + cv;
+}
+function groupItens(itens) {
+  const m = {};
+  itens.forEach(i => {
+    const k = i.produto_id+'|'+(i.observacao||'');
+    if (!m[k]) m[k] = {...i, quantidade:0};
+    m[k].quantidade += i.quantidade;
+  });
+  return Object.values(m);
+}
+
+// ══════════════════════════════════════════════
+// USUARIOS E LOG — localStorage (simples e confiável)
+// ══════════════════════════════════════════════
+function lsUsers() { return JSON.parse(localStorage.getItem('ch_users')||'[]'); }
+function lsSaveUsers(arr) { localStorage.setItem('ch_users', JSON.stringify(arr)); }
+function lsPutUser(u) { const arr=lsUsers(); const i=arr.findIndex(x=>x.id===u.id); if(i>=0) arr[i]=u; else arr.push(u); lsSaveUsers(arr); return u; }
+
+function lsLog() { return JSON.parse(localStorage.getItem('ch_log')||'[]'); }
+function lsSaveLog(arr) { localStorage.setItem('ch_log', JSON.stringify(arr.slice(-500))); } // keep last 500
+function lsPutLog(e) { const arr=lsLog(); arr.push(e); lsSaveLog(arr); }
+
+// ══════════════════════════════════════════════
+// OFFLINE SYNC QUEUE
+// ══════════════════════════════════════════════
+async function syncQueue() {
+  if (!S.online) { toast('Sem internet'); return; }
+  let ok = 0, erros = [];
+
+  // PATCH first (update if exists), POST if not found
+  async function patchOrPost(tabela, id, d) {
+    try {
+      const pr = await fetch(SB_URL+'/rest/v1/'+tabela+'?id=eq.'+id, {
+        method: 'PATCH',
+        headers: {...sbH(), 'Prefer': 'return=representation'},
+        body: JSON.stringify(d)
+      });
+      const rows = await pr.json().catch(()=>[]);
+      if (rows && rows.length > 0) { ok++; return; } // updated
+      // Not found — POST
+      const pr2 = await fetch(SB_URL+'/rest/v1/'+tabela, {
+        method: 'POST', headers: sbH(), body: JSON.stringify(d)
+      });
+      if (pr2.ok) ok++;
+      else { const t=await pr2.text(); erros.push(tabela+' POST: '+t.slice(0,80)); }
+    } catch(e) { erros.push(tabela+': '+e.message.slice(0,60)); }
+  }
+
+  // ── MESAS ──
+  const mesaCols = ['id','numero','nome','lugares','categoria','ativa'];
+  for (const m of await idbAll('mesas')) {
+    const d = Object.fromEntries(Object.entries(m).filter(([k])=>mesaCols.includes(k)));
+    await patchOrPost('mesas', m.id, d);
+  }
+
+  // ── CATEGORIAS ──
+  for (const c of await idbAll('categorias')) await patchOrPost('categorias', c.id, {id:c.id,nome:c.nome,ordem:c.ordem});
+
+  // ── PRODUTOS ──
+  const prodCols = ['id','nome','categoria_id','preco','unidade','controla_estoque','quantidade_estoque','estoque_minimo','fator_estoque','ativo','created_at'];
+  for (const p of await idbAll('produtos')) {
+    const d = Object.fromEntries(Object.entries(p).filter(([k])=>prodCols.includes(k)));
+    await patchOrPost('produtos', p.id, d);
+  }
+
+  // ── COMANDAS ──
+  const comCols = ['id','mesa_id','abertura_at','fechamento_at','status','couvert_valor','couvert_quantidade','desconto','total','forma_pagamento','observacao'];
+  for (const c of await idbAll('comandas')) {
+    const d = Object.fromEntries(Object.entries(c).filter(([k])=>comCols.includes(k)));
+    await patchOrPost('comandas', c.id, d);
+    if (c.nome_cliente) {
+      try { await fetch(SB_URL+'/rest/v1/comandas?id=eq.'+c.id,{method:'PATCH',headers:sbH(),body:JSON.stringify({nome_cliente:c.nome_cliente})}); } catch(e){}
+    }
+  }
+
+  // ── ITENS COMANDA ──
+  const itemCols = ['id','comanda_id','produto_id','quantidade','preco_unitario','observacao','status','created_at'];
+  for (const i of await idbAll('itens_comanda')) {
+    const d = Object.fromEntries(Object.entries(i).filter(([k])=>itemCols.includes(k)));
+    await patchOrPost('itens_comanda', i.id, d);
+  }
+
+  // ── MOVIMENTAÇÕES ESTOQUE ──
+  const movCols = ['id','produto_id','tipo','quantidade','valor_unitario','observacao','created_at'];
+  for (const m of await idbAll('movimentacoes_estoque')) {
+    const d = Object.fromEntries(Object.entries(m).filter(([k])=>movCols.includes(k)));
+    await patchOrPost('movimentacoes_estoque', m.id, d);
+  }
+
+  // ── CAIXA SESSÕES ──
+  const sessCols = ['id','abertura_at','fechamento_at','status','valor_abertura','valor_fechamento_informado','observacao'];
+  for (const s of await idbAll('caixa_sessoes')) {
+    const d = Object.fromEntries(Object.entries(s).filter(([k])=>sessCols.includes(k)));
+    await patchOrPost('caixa_sessoes', s.id, d);
+  }
+
+  // ── CAIXA MOVIMENTAÇÕES ──
+  const cMovCols = ['id','sessao_id','tipo','valor','forma_pagamento','descricao','created_at'];
+  for (const m of await idbAll('caixa_movimentacoes')) {
+    const d = Object.fromEntries(Object.entries(m).filter(([k])=>cMovCols.includes(k)));
+    if (m.comanda_id) d.comanda_id = m.comanda_id;
+    await patchOrPost('caixa_movimentacoes', m.id, d);
+  }
+
+  if (erros.length > 0) {
+    erros.forEach((e,i) => console.error('Erro '+(i+1)+':', e));
+    toast('⚠️ '+ok+' enviados, '+erros.length+' erros — veja F12', 6000);
+  } else {
+    toast('✅ '+ok+' registros enviados!', 4000);
+  }
+}
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+async function hashPass(p) {
+  // Try crypto.subtle first (https/localhost), fallback to simple hash for file://
+  try {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  } catch(e) {
+    // Simple deterministic hash fallback
+    let h = 0x811c9dc5;
+    for (let i = 0; i < p.length; i++) {
+      h ^= p.charCodeAt(i);
+      h = (h * 0x01000193) >>> 0;
+    }
+    // Make it longer and harder to guess
+    let s = '';
+    for (let i = 0; i < p.length; i++) {
+      h ^= (p.charCodeAt(i) * 31 + i * 7);
+      h = ((h << 5) ^ (h >>> 2) ^ 0x9e3779b9) >>> 0;
+      s += h.toString(16).padStart(8, '0');
+    }
+    return s + h.toString(16).padStart(8,'0');
+  }
+}
+
+async function checkPrimeiroAcesso() {
+  try {
+    const users = lsUsers();
+    if (users.length === 0) {
+      document.getElementById('primeiroAcesso').style.display = 'block';
+    }
+  } catch(e) {
+    // Store not ready yet, show first access anyway
+    document.getElementById('primeiroAcesso').style.display = 'block';
+  }
+}
+
+async function criarAdmin() {
+  const errEl = document.getElementById('loginErr');
+  try {
+    const nome = document.getElementById('adminNome')?.value?.trim();
+    const user = document.getElementById('loginUser')?.value?.trim();
+    const pass = document.getElementById('loginPass')?.value;
+
+    if (!nome) { errEl.textContent='Preencha o nome completo'; errEl.style.display='block'; return; }
+    if (!user) { errEl.textContent='Preencha o usuário'; errEl.style.display='block'; return; }
+    if (!pass || pass.length < 4) { errEl.textContent='Senha precisa ter pelo menos 4 caracteres'; errEl.style.display='block'; return; }
+
+    errEl.style.display='none';
+    const hash = await hashPass(pass);
+    const u = { id: uid(), nome, usuario: user.toLowerCase(), senha_hash: hash, perfil: 'admin', ativo: true, created_at: new Date().toISOString() };
+    lsPutUser( u);
+    if (S.online) { try { await sbPost('usuarios', u); } catch(e){ console.warn('Supabase usuarios:', e); } }
+    await entrar(u);
+  } catch(e) {
+    console.error('Erro ao criar admin:', e);
+    errEl.textContent = 'Erro ao criar: ' + e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+async function doLogin() {
+  const user = document.getElementById('loginUser')?.value?.trim().toLowerCase();
+  const pass = document.getElementById('loginPass')?.value;
+  const err = document.getElementById('loginErr');
+  if (!user || !pass) return;
+  try {
+    const hash = await hashPass(pass);
+    let users = lsUsers();
+    if (S.online) {
+      try {
+        const remote = await sbGet('usuarios', `usuario=eq.${encodeURIComponent(user)}&ativo=eq.true`);
+        if (remote.length) { lsPutUser( remote[0]); users = lsUsers(); }
+      } catch(e){}
+    }
+    const found = users.find(u => u.usuario === user && u.senha_hash === hash && u.ativo);
+    if (found) { err.style.display='none'; await entrar(found); }
+    else { err.textContent='Usuário ou senha incorretos'; err.style.display='block'; }
+  } catch(e) {
+    err.textContent = 'Erro ao entrar: ' + e.message;
+    err.style.display='block';
+  }
+}
+
+async function entrar(u) {
+  S.currentUser = u;
+  document.getElementById('loginOverlay').style.display = 'none';
+  const badge = document.getElementById('userBadge');
+  badge.style.display = 'flex';
+  document.getElementById('userNome').textContent = '👤 ' + u.nome;
+  await registrarLog('Login', `Usuário ${u.usuario} entrou no sistema`);
+}
+
+async function doLogout() {
+  if (!await customConfirm('Deseja sair do sistema?', 'Sair', true)) return;
+  window._usuarioAnterior = null;
+  sairSistema();
+}
+
+function doTrocarUsuario() {
+  window._usuarioAnterior = S.currentUser;
+  sairSistema();
+  document.getElementById('btnCancelarTroca').style.display = 'block';
+}
+
+function cancelarTroca() {
+  if (!window._usuarioAnterior) return;
+  entrar(window._usuarioAnterior);
+  window._usuarioAnterior = null;
+  document.getElementById('btnCancelarTroca').style.display = 'none';
+}
+
+function sairSistema() {
+  S.currentUser = null;
+  document.getElementById('userBadge').style.display = 'none';
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+  document.getElementById('primeiroAcesso').style.display = 'none';
+  document.getElementById('loginUser').focus();
+  if (!window._usuarioAnterior) {
+    document.getElementById('btnCancelarTroca').style.display = 'none';
+  }
+}
+
+function mTrocarSenha() {
+  showModal(`<div class="modal-title">Trocar Senha</div>
+    <div class="fg"><div class="lbl">Senha atual</div>
+      <input class="inp" type="password" id="senhaAtual" placeholder="••••••••"></div>
+    <div class="fg"><div class="lbl">Nova senha</div>
+      <input class="inp" type="password" id="senhaNova" placeholder="Mínimo 4 caracteres"></div>
+    <div class="fg"><div class="lbl">Confirmar nova senha</div>
+      <input class="inp" type="password" id="senhaConfirm" placeholder="Repita a nova senha"></div>
+    <div id="senhaErr" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none"></div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doTrocarSenha()">Salvar</button>
+    </div>`);
+}
+
+async function doTrocarSenha() {
+  const atual = document.getElementById('senhaAtual').value;
+  const nova = document.getElementById('senhaNova').value;
+  const confirm = document.getElementById('senhaConfirm').value;
+  const errEl = document.getElementById('senhaErr');
+
+  if (!atual || !nova || !confirm) { errEl.textContent='Preencha todos os campos'; errEl.style.display='block'; return; }
+  if (nova.length < 4) { errEl.textContent='Nova senha muito curta (mínimo 4 caracteres)'; errEl.style.display='block'; return; }
+  if (nova !== confirm) { errEl.textContent='As senhas não coincidem'; errEl.style.display='block'; return; }
+
+  const hashAtual = await hashPass(atual);
+  if (hashAtual !== S.currentUser.senha_hash) { errEl.textContent='Senha atual incorreta'; errEl.style.display='block'; return; }
+
+  const hashNova = await hashPass(nova);
+  S.currentUser.senha_hash = hashNova;
+  lsPutUser( S.currentUser);
+  if (S.online) { try { await sbPatch('usuarios', `id=eq.${S.currentUser.id}`, { senha_hash: hashNova }); } catch(e){} }
+  await registrarLog('Trocar senha', `${S.currentUser.usuario} alterou a senha`);
+  closeModal();
+  toast('Senha alterada com sucesso!');
+}
+
+// ══════════════════════════════════════════════
+// ACTIVITY LOG
+// ══════════════════════════════════════════════
+async function registrarLog(atividade, detalhes='') {
+  if (!S.currentUser) return;
+  const entry = {
+    id: uid(),
+    usuario_id: S.currentUser.id,
+    usuario_nome: S.currentUser.nome,
+    atividade, detalhes,
+    created_at: new Date().toISOString()
+  };
+  try {
+    lsPutLog( entry);
+    if (S.online) { try { await sbPost('log_atividades', entry); } catch(e){} }
+  } catch(e) { console.warn('Log error:', e); }
+}
+
+// ══════════════════════════════════════════════
+// NETWORK
+// ══════════════════════════════════════════════
+function updateNet() {
+  S.online = navigator.onLine;
+  document.getElementById('ndot').style.background = S.online ? 'var(--green)' : 'var(--red)';
+  document.getElementById('nlabel').textContent = S.online ? 'online' : 'offline';
+}
+window.addEventListener('online', async () => {
+  updateNet();
+  toast('Online! Sincronizando...');
+  await syncQueue();
+  await loadRemote();
+  render();
+});
+window.addEventListener('offline', () => { updateNet(); toast('Trabalhando offline'); });
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+function go(page) {
+  S.page = page;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.p===page));
+  render();
+}
+function render() {
+  const el = document.getElementById('app');
+  switch(S.page) {
+    case 'mesas':   el.innerHTML = pgMesas();   postMesas();   break;
+    case 'cardapio':el.innerHTML = pgCardapio(); postCardapio();break;
+    case 'estoque': el.innerHTML = pgEstoque();  break;
+    case 'caixa':   el.innerHTML = pgCaixa();    postCaixa();  break;
+    case 'config':  el.innerHTML = pgConfig();   postConfig(); break;
+    case 'relatorios': el.innerHTML = pgRelatorios(); postRelatorios(); break;
+  }
+}
+
+// ══════════════════════════════════════════════
+// PAGE: MESAS
+// ══════════════════════════════════════════════
+function mesaCard(mesa) {
+  const c = getComanda(mesa.id);
+  const ocu = !!c;
+  const totalBruto = ocu ? comandaTotal(c.id) : 0;
+  const jaPagoCard = ocu ? (c.pagamentos_parciais||[]).reduce((s,p)=>s+p.valor,0) : 0;
+  const total = totalBruto - jaPagoCard;
+  const hasCv = ocu && (c.couvert_valor||0) > 0;
+  let inner = '';
+  if (hasCv) inner += '<div class="couvert-pip">COUVERT</div>';
+  inner += '<div class="mesa-num">' + mesa.numero + '</div>';
+  if (mesa.nome) inner += '<div class="mesa-label">' + mesa.nome + '</div>';
+  if (mesa.lugares) inner += '<div style="font-size:16px;font-weight:800;color:var(--text2);margin-top:2px">🪑 ' + mesa.lugares + '</div>';
+  if (ocu) {
+    if (c.nome_cliente) inner += '<div class="mesa-extra" style="font-weight:800;color:var(--text)">' + c.nome_cliente + '</div>';
+    inner += '<div class="mesa-extra">' + elapsed(c.abertura_at) + '</div>';
+    inner += '<div class="mesa-total">' + fmtR(total) + '</div>';
+  } else {
+    inner += '<div class="mesa-label" style="color:var(--text3)">livre</div>';
+  }
+  return '<div class="mesa-card ' + (ocu ? 'ocupada' : '') + '" data-mid="' + mesa.id + '">' + inner + '</div>';
+}
+
+function pgMesas() {
+  const baixos = S.produtos.filter(p => p.controla_estoque && p.estoque_minimo > 0 && p.quantidade_estoque <= p.estoque_minimo);
+  let h = '';
+  if (baixos.length) {
+    h += '<div class="alert alert-warn">⚠️ Estoque baixo: ' + baixos.map(p => p.nome + ' (' + p.quantidade_estoque + '/' + p.estoque_minimo + ' ' + (p.unidade||'un') + ')').join(' · ') + '</div>';
+  }
+
+  h += '<div class="sec-hdr" style="margin-bottom:4px"><span></span><button class="btn btn-primary btn-sm" onclick="mAddMesa()">+ Mesa</button></div>';
+
+  if (!S.mesas.length) {
+    h += '<div class="empty"><div class="empty-icon">🪑</div><p>Nenhuma mesa cadastrada</p><p class="fs12 c-muted mt8">Adicione mesas em Configurações</p></div>';
+    return h;
+  }
+
+  const grupos = { Mesa: [], Bistro: [] };
+  S.mesas.forEach(function(m) {
+    var cat = m.categoria || 'Mesa';
+    if (!grupos[cat]) grupos[cat] = [];
+    grupos[cat].push(m);
+  });
+
+  var secoes = [['Mesa','🪑 Mesas'],['Bistro','☕ Bistrôs']].filter(function(pair){ return grupos[pair[0]] && grupos[pair[0]].length > 0; });
+
+  secoes.forEach(function(pair) {
+    var cat = pair[0], label = pair[1];
+    h += '<div style="font-family:Bebas Neue,sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold);margin:14px 0 8px">' + label + '</div>';
+    h += '<div class="mesas-grid">';
+    grupos[cat].forEach(function(mesa) { h += mesaCard(mesa); });
+    h += '</div>';
+  });
+
+  return h;
+}
+
+function postMesas() {
+  document.querySelectorAll('.mesa-card').forEach(card => {
+    const mid = card.dataset.mid;
+    const c = getComanda(mid);
+    card.onclick = () => c ? mComanda(mid) : mAbrirMesa(mid);
+  });
+}
+
+// ══════════════════════════════════════════════
+// MODAL: ABRIR MESA
+// ══════════════════════════════════════════════
+function mAbrirMesa(mid) {
+  const mesa = getMesa(mid);
+  if (!mesa) return;
+  const cv = S.couvert;
+  showModal(`
+    <div class="modal-title">Mesa ${mesa.numero}${mesa.nome?' — '+mesa.nome:''}</div>
+    <p class="fs12 c-muted" style="margin-bottom:14px">Mesa livre — deseja abrir uma comanda?</p>
+    <div class="fg">
+      <div class="lbl">Nome do cliente / responsável</div>
+      <input class="inp" id="mnome_cli" placeholder="Ex: João, Família Silva...">
+    </div>
+    ${cv.ativo ? `
+    <div class="fg">
+      <div class="lbl">Couvert artístico — ${fmtR(cv.valor)}/pessoa</div>
+      <div class="qc">
+        <button class="qbtn" onclick="let v=parseInt(document.getElementById('cvq').value)||0; document.getElementById('cvq').value=Math.max(0,v-1)">−</button>
+        <input id="cvq" type="number" class="inp" value="0" min="0" style="width:60px;text-align:center">
+        <button class="qbtn" onclick="let v=parseInt(document.getElementById('cvq').value)||0; document.getElementById('cvq').value=v+1">+</button>
+        <span class="fs12 c-muted">pessoas</span>
+      </div>
+    </div>` : ''}
+    <div class="fg">
+      <div class="lbl">Observação (opcional)</div>
+      <input class="inp" id="mobs" placeholder="Ex: aniversariante...">
+    </div>
+    <div class="flex gap8 mt12">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doAbrirMesa('${mid}')">Abrir Mesa</button>
+    </div>
+  `);
+}
+async function doAbrirMesa(mid) {
+  const cv = S.couvert;
+  const cvq = cv.ativo ? (parseInt(document.getElementById('cvq')?.value)||0) : 0;
+  const obs = document.getElementById('mobs')?.value||'';
+  const nome_cliente = document.getElementById('mnome_cli')?.value?.trim()||'';
+  const comanda = {
+    id: uid(), mesa_id: mid,
+    abertura_at: new Date().toISOString(),
+    status: 'aberta',
+    couvert_valor: cv.ativo ? cv.valor : 0,
+    couvert_quantidade: cvq,
+    desconto: 0, total: null, observacao: obs,
+    nome_cliente
+  };
+  S.comandas.push(comanda);
+  S.itens[comanda.id] = [];
+  await idbPut('comandas', comanda);
+  if (S.online) {
+    // Send only guaranteed columns — fallback removes optional ones
+    const safeCom = {
+      id: comanda.id, mesa_id: comanda.mesa_id,
+      abertura_at: comanda.abertura_at, status: comanda.status,
+      couvert_valor: comanda.couvert_valor, couvert_quantidade: comanda.couvert_quantidade,
+      desconto: comanda.desconto, total: comanda.total, observacao: comanda.observacao
+    };
+    try {
+      await sbPost('comandas', {...safeCom, nome_cliente: comanda.nome_cliente});
+    } catch(e) {
+      try { await sbPost('comandas', safeCom); }
+      catch(e2) { console.warn('Comanda Supabase falhou:', e2.message); }
+    }
+  }
+  await registrarLog('Abrir mesa', `Mesa ${getMesa(mid).numero}${comanda.nome_cliente?' — '+comanda.nome_cliente:''}`);
+  closeModal();
+  toast(`Mesa ${getMesa(mid).numero} aberta!`);
+  render();
+}
+
+// ══════════════════════════════════════════════
+// MODAL: COMANDA (mesa ocupada)
+// ══════════════════════════════════════════════
+function mComanda(mid) {
+  const mesa = getMesa(mid);
+  const c = getComanda(mid);
+  if (!c) return;
+  const itens = S.itens[c.id]||[];
+  const grouped = groupItens(itens);
+  const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+  const cvT = (c.couvert_valor||0)*(c.couvert_quantidade||0);
+  const jaPago = (c.pagamentos_parciais||[]).reduce((s,p)=>s+p.valor,0);
+  const total = sub + cvT - (c.desconto||0);
+
+  const itens_ord = [...itens].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+  let itH = '';
+  if (!itens_ord.length) {
+    itH = '<p class="fs12 c-muted tc" style="padding:14px">Nenhum item ainda</p>';
+  } else {
+    itens_ord.forEach(i => {
+      const p = getProd(i.produto_id);
+      const hora = i.created_at ? fmtT(i.created_at) : '';
+      itH += '<div class="li">'
+        + '<div class="flex-1">'
+        + '<div class="f700">' + (i.quantidade !== 1 ? i.quantidade + 'x ' : '') + (p ? p.nome : '(removido)') + '</div>'
+        + '<div class="fs11 c-muted">' + hora + (i.observacao ? ' · ' + i.observacao : '') + '</div>'
+        + '</div>'
+        + '<div class="c-gold f800">' + fmtR(i.quantidade * i.preco_unitario) + '</div>'
+        + '<button class="btn btn-ghost btn-sm btn-icon" data-iid="' + i.id + '" data-mid="' + c.mesa_id + '" onclick="rmItemById(this.dataset.iid, this.dataset.mid)">✕</button>'
+        + '</div>';
+    });
+  }
+
+  showModal(`
+    <div class="flex aic jsb" style="margin-bottom:12px">
+      <div>
+        <div class="modal-title" style="margin-bottom:0">Mesa ${mesa.numero}${mesa.nome?' — '+mesa.nome:''}</div>
+        ${c.nome_cliente?`<div class="fs12" style="color:var(--text2);margin-top:2px">👤 ${c.nome_cliente}</div>`:''}
+      </div>
+      <span class="fs11 c-muted">${elapsed(c.abertura_at)}</span>
+    </div>
+    <div class="card" style="margin-bottom:10px">${itH}</div>
+    ${cvT>0?`<div class="tr"><span class="c-muted">Couvert (${c.couvert_quantidade}x)</span><span>${fmtR(cvT)}</span></div>`:''}
+    ${c.desconto>0?`<div class="tr"><span class="c-muted">Desconto</span><span class="c-green">− ${fmtR(c.desconto)}</span></div>`:''}
+    <div class="tr big"><span>TOTAL</span><span id="comanda_total_${c.id}">${fmtR(total)}</span></div>
+    ${jaPago>0?`<div class="tr" style="margin-top:4px"><span style="color:var(--green)">✅ Já pago</span><span style="color:var(--green);font-weight:800">${fmtR(jaPago)}</span></div><div class="tr"><span class="f800">Restante</span><span class="f800" style="color:var(--gold)">${fmtR(Math.max(0,total-jaPago))}</span></div>`:''}
+    <div class="flex gap8 mt16">
+      <button class="btn btn-primary flex-1" onclick="mAddItem('${c.id}')">+ Adicionar</button>
+      <button class="btn btn-ghost" onclick="closeModal();render()">Voltar</button>
+    </div>
+    ${(c.pagamentos_parciais||[]).length > 0 ? '<div class="card" style="margin:8px 0;padding:10px 12px"><div class="fs11 c-muted f800" style="margin-bottom:6px">PAGAMENTOS PARCIAIS</div>'
+      + (c.pagamentos_parciais||[]).map(p=>'<div class="tr" style="padding:3px 0"><span class="fs12 c-muted">' + fmtT(p.created_at) + ' · ' + p.obs + '</span><span class="c-green f800">' + fmtR(p.valor) + '</span></div>').join('')
+      + '</div>' : ''}
+    <div class="flex gap8 mt8">
+      <button class="btn btn-ghost flex-1" onclick="mPagamentoParcial('${mid}')">💸 Parcial</button>
+      <button class="btn btn-success flex-1" onclick="mFecharMesa('${mid}')">💳 Fechar Mesa</button>
+    </div>
+  `);
+}
+
+// ══════════════════════════════════════════════
+// MODAL: ADICIONAR ITEM
+// ══════════════════════════════════════════════
+function mAddItem(cid) {
+  let selectedCat = S.catTab || (S.categorias[0]?.id||null);
+  function tabsH() {
+    return '<div class="tabs">'
+      + `<span class="tab ${!selectedCat?'active':''}" onclick="filterCat(null,'${cid}')">Todos</span>`
+      + S.categorias.map(c=>`<span class="tab ${selectedCat===c.id?'active':''}" onclick="filterCat('${c.id}','${cid}')">${c.nome}</span>`).join('')
+      + '</div>';
+  }
+  function prodsH() {
+    const list = selectedCat ? S.produtos.filter(p=>p.categoria_id===selectedCat) : S.produtos;
+    if (!list.length) return '<p class="fs12 c-muted tc" style="padding:20px">Nenhum produto</p>';
+    return list.map(p=>`
+      <div class="li">
+        <div class="flex-1">
+          <div class="f700">${p.nome}</div>
+          <div class="c-gold f800 fs12">${fmtR(p.preco)} <span class="c-muted" style="font-weight:400">/ ${p.unidade||'un'}</span>
+          ${p.controla_estoque?`<span class="c-muted"> · estq: ${p.quantidade_estoque}</span>`:''}
+          </div>
+        </div>
+        <div class="flex aic gap8">
+          <div class="qc">
+            <button class="qbtn" onclick="let i=document.getElementById('q_${p.id}');i.value=Math.max(0.5,parseFloat(i.value||1)-1)">−</button>
+            <input id="q_${p.id}" type="number" class="inp" value="1" min="0.5" step="0.5" style="width:48px;text-align:center;padding:6px 4px">
+            <button class="qbtn" onclick="let i=document.getElementById('q_${p.id}');i.value=parseFloat(i.value||1)+1">+</button>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="doAddItem('${cid}','${p.id}')">Add</button>
+        </div>
+      </div>`).join('');
+  }
+  window._addItemCid = cid;
+  window._addItemCat = selectedCat;
+  showModal(`
+    <div class="modal-title">Adicionar Item</div>
+    <div id="aitabs">${tabsH()}</div>
+    <div id="aiprods" class="card">${prodsH()}</div>
+    <button class="btn btn-ghost w-full mt12" onclick="mComanda('${S.comandas.find(c=>c.id===cid)?.mesa_id}')">← Voltar para comanda</button>
+  `);
+}
+window.filterCat = function(catId, cid) {
+  S.catTab = catId;
+  window._addItemCat = catId;
+  document.getElementById('aitabs').innerHTML = '<div class="tabs">'
+    + `<span class="tab ${!catId?'active':''}" onclick="filterCat(null,'${cid}')">Todos</span>`
+    + S.categorias.map(c=>`<span class="tab ${catId===c.id?'active':''}" onclick="filterCat('${c.id}','${cid}')">${c.nome}</span>`).join('')
+    + '</div>';
+  const list = catId ? S.produtos.filter(p=>p.categoria_id===catId) : S.produtos;
+  document.getElementById('aiprods').innerHTML = !list.length
+    ? '<p class="fs12 c-muted tc" style="padding:20px">Nenhum produto</p>'
+    : list.map(p=>`
+      <div class="li">
+        <div class="flex-1">
+          <div class="f700">${p.nome}</div>
+          <div class="c-gold f800 fs12">${fmtR(p.preco)} <span class="c-muted" style="font-weight:400">/ ${p.unidade||'un'}</span>
+          ${p.controla_estoque?`<span class="c-muted"> · estq: ${p.quantidade_estoque}</span>`:''}
+          </div>
+        </div>
+        <div class="flex aic gap8">
+          <div class="qc">
+            <button class="qbtn" onclick="let i=document.getElementById('q_${p.id}');i.value=Math.max(0.5,parseFloat(i.value||1)-1)">−</button>
+            <input id="q_${p.id}" type="number" class="inp" value="1" min="0.5" step="0.5" style="width:48px;text-align:center;padding:6px 4px">
+            <button class="qbtn" onclick="let i=document.getElementById('q_${p.id}');i.value=parseFloat(i.value||1)+1">+</button>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="doAddItem('${cid}','${p.id}')">Add</button>
+        </div>
+      </div>`).join('');
+};
+async function doAddItem(cid, pid) {
+  const prod = getProd(pid);
+  if (!prod) return;
+  const qtdInput = document.getElementById('q_'+pid);
+  const qtd = qtdInput ? (parseFloat(qtdInput.value)||1) : 1;
+  const item = {
+    id: uid(), comanda_id: cid, produto_id: pid,
+    quantidade: qtd, preco_unitario: prod.preco,
+    status: 'pendente', created_at: new Date().toISOString()
+  };
+  if (!S.itens[cid]) S.itens[cid]=[];
+  S.itens[cid].push(item);
+  await idbPut('itens_comanda', item);
+  // Stock debit
+  if (prod.controla_estoque) {
+    const debito = qtd * (prod.fator_estoque || 1);
+    prod.quantidade_estoque = Math.max(0,(prod.quantidade_estoque||0)-debito);
+    await idbPut('produtos', prod);
+    if (S.online) { try { await sbPatch('produtos',`id=eq.${pid}`,{quantidade_estoque:prod.quantidade_estoque}); }catch(e){} }
+  }
+  if (S.online) { try { await sbPost('itens_comanda', item); }catch(e){} }
+  toast(`${prod.nome} adicionado!`);
+  // Update comanda modal to reflect new total
+  const _c = S.comandas.find(x=>x.id===cid);
+  if (_c) {
+    const itens = S.itens[cid]||[];
+    const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+    const cvT = (_c.couvert_valor||0)*(_c.couvert_quantidade||0);
+    const totalEl = document.getElementById('comanda_total_'+cid);
+    if (totalEl) totalEl.textContent = fmtR(sub+cvT-(_c.desconto||0));
+  }
+  mAddItem(cid);
+}
+async function rmItemById(iid, mid) {
+  const c = getComanda(mid);
+  if (!c) return;
+  const itens = S.itens[c.id] || [];
+  const idx = itens.findIndex(i => i.id === iid);
+  if (idx < 0) return;
+  const item = itens[idx];
+  const prod = getProd(item.produto_id);
+  if (prod && prod.controla_estoque) {
+    prod.quantidade_estoque = (prod.quantidade_estoque || 0) + (item.quantidade * (prod.fator_estoque || 1));
+    await idbPut('produtos', prod);
+    if (S.online) { try { await sbPatch('produtos', 'id=eq.' + prod.id, { quantidade_estoque: prod.quantidade_estoque }); } catch(e){} }
+  }
+  S.itens[c.id].splice(idx, 1);
+  await idbDel('itens_comanda', item.id);
+  if (S.online) { try { await sbDel('itens_comanda', 'id=eq.' + item.id); } catch(e){} }
+  mComanda(mid);
+}
+
+async function rmItem(cid, pid) {
+  const itens = S.itens[cid]||[];
+  const idx = [...itens].reverse().findIndex(i=>i.produto_id===pid);
+  if (idx<0) return;
+  const realIdx = itens.length-1-idx;
+  const item = itens[realIdx];
+  const prod = getProd(pid);
+  if (prod?.controla_estoque) {
+    prod.quantidade_estoque = (prod.quantidade_estoque||0)+(item.quantidade*(prod.fator_estoque||1));
+    await idbPut('produtos', prod);
+    if (S.online) { try { await sbPatch('produtos',`id=eq.${pid}`,{quantidade_estoque:prod.quantidade_estoque}); }catch(e){} }
+  }
+  S.itens[cid].splice(realIdx,1);
+  await idbDel('itens_comanda', item.id);
+  if (S.online) { try { await sbDel('itens_comanda',`id=eq.${item.id}`); }catch(e){} }
+  const c = S.comandas.find(x=>x.id===cid);
+  if (c) mComanda(c.mesa_id);
+}
+
+// ══════════════════════════════════════════════
+// MODAL: FECHAR MESA
+// ══════════════════════════════════════════════
+function mFecharMesa(mid) {
+  const mesa = getMesa(mid);
+  const c = getComanda(mid);
+  if (!c) return;
+  const itens = S.itens[c.id]||[];
+  const grouped = groupItens(itens);
+  const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+  const cvT = (c.couvert_valor||0)*(c.couvert_quantidade||0);
+
+  let sumH = grouped.map(i=>{const p=getProd(i.produto_id); return `
+    <div class="tr"><span>${i.quantidade}x ${p?p.nome:'?'}</span><span>${fmtR(i.quantidade*i.preco_unitario)}</span></div>`}).join('');
+  if (cvT>0) sumH += `<div class="tr"><span class="c-muted">Couvert (${c.couvert_quantidade}x)</span><span>${fmtR(cvT)}</span></div>`;
+  sumH += `<div class="divider"></div><div class="tr"><span>Subtotal</span><span>${fmtR(sub+cvT)}</span></div>`;
+
+  const jaPago = (c.pagamentos_parciais||[]).reduce((s,p)=>s+p.valor,0);
+  const totalBase = sub + cvT - (c.desconto||0);
+  const restantePagar = Math.max(0, totalBase - jaPago);
+  showModal(`
+    <div class="modal-title">Fechar Mesa ${mesa.numero}</div>
+    ${jaPago>0?`<div class="tr" style="padding:4px 0"><span class="c-muted">Total da comanda</span><span>${fmtR(totalBase)}</span></div><div class="tr" style="padding:4px 0"><span style="color:var(--green)">✅ Já pago</span><span style="color:var(--green)">${fmtR(jaPago)}</span></div>`:''}
+    <div class="card" style="margin-bottom:12px">${sumH||'<p class="fs12 c-muted tc">Nenhum item</p>'}</div>
+    <div class="fg">
+      <div class="lbl">Desconto (R$)</div>
+      <input class="inp" id="fmdesc" type="number" min="0" step="0.50" value="${c.desconto||0}">
+    </div>
+    <div class="tr big" style="margin-bottom:14px">
+      <span>${jaPago>0?'A PAGAR':'TOTAL'}</span><span id="fmtotal">${fmtR(jaPago>0?restantePagar:totalBase)}</span>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="flex aic jsb" style="margin-bottom:10px">
+        <span class="f800">Dividir a conta</span>
+        <div class="qc">
+          <button class="qbtn" onclick="splitChange(-1)">−</button>
+          <input id="splitQty" type="number" class="inp" value="1" min="1" style="width:48px;text-align:center;padding:6px 4px" oninput="splitRender()">
+          <button class="qbtn" onclick="splitChange(1)">+</button>
+        </div>
+      </div>
+      <div id="splitInfo"></div>
+    </div>
+
+    <div id="splitPagamentos">
+      <div class="lbl">Forma de pagamento</div>
+      <div class="pay-grid">
+        <button class="pay-btn" data-v="dinheiro" onclick="selPay(this)">💵 Dinheiro</button>
+        <button class="pay-btn" data-v="cartao_credito" onclick="selPay(this)">💳 Crédito</button>
+        <button class="pay-btn" data-v="cartao_debito" onclick="selPay(this)">💳 Débito</button>
+        <button class="pay-btn" data-v="pix" onclick="selPay(this)">📱 Pix</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <button class="btn btn-ghost w-full" onclick="mPagamentoParcialFromFecha('${mid}')">💸 Pagamento parcial (alguém vai embora)</button>
+
+    <div class="flex gap8 mt12">
+      <button class="btn btn-ghost flex-1" onclick="mComanda('${mid}')">← Voltar</button>
+      <button class="btn btn-success flex-1" onclick="doFechar('${mid}')">✓ Confirmar</button>
+    </div>
+  `);
+
+  function calcTotal() { const bruto = sub + cvT - (parseFloat(document.getElementById('fmdesc')?.value)||0); return jaPago > 0 ? Math.max(0, bruto - jaPago) : bruto; }
+
+  window.splitRender = function() {
+    const n = parseInt(document.getElementById('splitQty')?.value)||1;
+    const tot = calcTotal();
+    const pp = Math.round((tot/n)*100)/100;
+    const info = document.getElementById('splitInfo');
+    const pags = document.getElementById('splitPagamentos');
+    if (n <= 1) {
+      if (info) info.innerHTML = '';
+      if (pags) pags.innerHTML = '<div class="lbl">Forma de pagamento</div><div class="pay-grid">'
+        + '<button class="pay-btn" data-v="dinheiro" onclick="selPay(this)">💵 Dinheiro</button>'
+        + '<button class="pay-btn" data-v="cartao_credito" onclick="selPay(this)">💳 Crédito</button>'
+        + '<button class="pay-btn" data-v="cartao_debito" onclick="selPay(this)">💳 Débito</button>'
+        + '<button class="pay-btn" data-v="pix" onclick="selPay(this)">📱 Pix</button></div>';
+    } else {
+      if (info) info.innerHTML = '<div class="tr" style="padding:6px 0"><span class="c-muted fs12">Total a distribuir</span><span id="splitRestante" class="f800 c-gold">' + fmtR(tot) + '</span></div>';
+      let pagsHtml = '<div class="lbl" style="margin-bottom:8px">Valor e pagamento por pessoa</div>';
+      for (let i=0; i<n; i++) {
+        pagsHtml += '<div class="card" style="margin-bottom:8px;padding:10px 12px">'
+          + '<div class="flex aic jsb" style="margin-bottom:8px">'
+          + '<span class="f800">Pessoa ' + (i+1) + '</span>'
+          + '<input type="number" class="inp split-val" data-p="' + i + '" value="' + pp.toFixed(2) + '" min="0" step="0.50" style="width:90px;text-align:right;padding:4px 8px" oninput="atualizarRestante(' + tot.toFixed(2) + ')">'
+          + '</div>'
+          + '<div class="flex gap8">'
+          + '<button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="dinheiro" data-p="' + i + '" onclick="selPayPessoa(this)">💵</button>'
+          + '<button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="cartao_credito" data-p="' + i + '" onclick="selPayPessoa(this)">💳 Cred</button>'
+          + '<button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="cartao_debito" data-p="' + i + '" onclick="selPayPessoa(this)">💳 Déb</button>'
+          + '<button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="pix" data-p="' + i + '" onclick="selPayPessoa(this)">📱</button>'
+          + '</div></div>';
+      }
+      if (pags) pags.innerHTML = pagsHtml;
+    }
+  };
+
+  window.atualizarRestante = function(tot) {
+    const inputs = document.querySelectorAll('.split-val');
+    const usado = Array.from(inputs).reduce((s,i)=>s+(parseFloat(i.value)||0),0);
+    const resto = tot - usado;
+    const el = document.getElementById('splitRestante');
+    if (el) { el.textContent = fmtR(Math.abs(resto)); el.style.color = Math.abs(resto)<0.01?'var(--green)':resto<0?'var(--red)':'var(--gold)'; }
+  };
+
+  window.splitChange = function(d) {
+    const el = document.getElementById('splitQty');
+    el.value = Math.max(1,(parseInt(el.value)||1)+d);
+    window.splitRender();
+  };
+
+  document.getElementById('fmdesc').oninput = e => {
+    const d = parseFloat(e.target.value)||0;
+    document.getElementById('fmtotal').textContent = fmtR(sub+cvT-d);
+    window.splitRender();
+  };
+
+  window.splitRender();
+}
+window.selPay = btn => { document.querySelectorAll('.pay-btn:not([data-p])').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); };
+window.selPayPessoa = btn => {
+  const p = btn.dataset.p;
+  document.querySelectorAll(`.pay-btn[data-p="${p}"]`).forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+};
+async function doFechar(mid) {
+  const c = getComanda(mid);
+  if (!c) return;
+  const n = parseInt(document.getElementById('splitQty')?.value)||1;
+  const desc = parseFloat(document.getElementById('fmdesc').value)||0;
+  const itens = S.itens[c.id]||[];
+  const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+  const cvT = (c.couvert_valor||0)*(c.couvert_quantidade||0);
+  const total = sub+cvT-desc;
+  let forma;
+  if (n <= 1) {
+    const payBtn = document.querySelector('.pay-btn.sel');
+    if (!payBtn) { toast('Selecione a forma de pagamento'); return; }
+    forma = payBtn.dataset.v;
+  } else {
+    const sels = document.querySelectorAll('.pay-btn[data-p].sel');
+    if (sels.length < n) { toast(`Selecione o pagamento de todas as ${n} pessoas`); return; }
+    forma = 'dividido';
+  }
+
+  Object.assign(c, { status:'fechada', fechamento_at:new Date().toISOString(), desconto:desc, total, forma_pagamento:forma });
+  await idbPut('comandas', c);
+  if (S.online) { try { await sbPatch('comandas','id=eq.'+c.id,{status:'fechada',fechamento_at:c.fechamento_at,desconto:desc,total,forma_pagamento:forma}); }catch(e){} }
+
+  // Caixa movement
+  if (S.caixaSessao) {
+    const n2 = parseInt(document.getElementById('splitQty')?.value)||1;
+    if (n2 > 1) {
+      const splitInputs = document.querySelectorAll('.split-val');
+      const sels = document.querySelectorAll('.pay-btn[data-p].sel');
+      for (const btn of sels) {
+        const pIdx = parseInt(btn.dataset.p);
+        const pVal = splitInputs[pIdx] ? (parseFloat(splitInputs[pIdx].value)||0) : (total/n2);
+        const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:pVal,
+          forma_pagamento:btn.dataset.v, descricao:'Mesa ' + getMesa(mid).numero + ' (pessoa ' + (parseInt(btn.dataset.p)+1) + '/' + n2 + ')', comanda_id:c.id, created_at:new Date().toISOString() };
+        await idbPut('caixa_movimentacoes', mov);
+        if (S.online) { try { await sbPost('caixa_movimentacoes', mov); }catch(e){} }
+      }
+    } else {
+      const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:total,
+        forma_pagamento:forma, descricao:`Mesa ${getMesa(mid).numero}`, comanda_id:c.id, created_at:new Date().toISOString() };
+      await idbPut('caixa_movimentacoes', mov);
+      if (S.online) { try { await sbPost('caixa_movimentacoes', mov); }catch(e){} }
+    }
+  }
+
+  await registrarLog('Fechar mesa', `Mesa ${getMesa(mid).numero} — ${fmtR(total)} via ${forma}`);
+  S.comandas = S.comandas.filter(x=>x.id!==c.id);
+  delete S.itens[c.id];
+  closeModal();
+  toast(`Mesa ${getMesa(mid).numero} fechada! ${fmtR(total)}`);
+  render();
+}
+
+// ══════════════════════════════════════════════
+// SHORTCUT: QUICK ADD MESA (from mesas page)
+// ══════════════════════════════════════════════
+function mAddMesa() { go('config'); setTimeout(()=>toast('Use "+ Mesa" ou "+ Bistrô" em Configurações 👇'),200); }
+
+// ══════════════════════════════════════════════
+// PAGE: CARDÁPIO
+// ══════════════════════════════════════════════
+function pgCardapio() {
+  const selCat = S.catTab;
+  if (!S.categorias.length) return `
+    <div class="sec-hdr"><span class="sec-title">CARDÁPIO</span>
+    <button class="btn btn-ghost btn-sm" onclick="mCategorias()">🏷 Cats</button></div>
+    <div class="empty"><div class="empty-icon">🏷️</div>
+      <p>Crie categorias primeiro</p>
+      <button class="btn btn-primary mt12" onclick="mCategorias()">Criar categoria</button></div>`;
+
+  const tabs = '<div class="tabs">'
+    + `<span class="tab ${!selCat?'active':''}" data-cat="">Todos</span>`
+    + S.categorias.map(c=>`<span class="tab ${selCat===c.id?'active':''}" data-cat="${c.id}">${c.nome}</span>`).join('')
+    + '</div>';
+
+  const prods = selCat ? S.produtos.filter(p=>p.categoria_id===selCat) : S.produtos;
+  const prodsH = !prods.length
+    ? '<p class="fs12 c-muted tc" style="padding:20px">Nenhum produto nesta categoria</p>'
+    : prods.map(p=>`<div class="li">
+      <div class="flex-1">
+        <div class="f700">${p.nome} ${!p.ativo?'<span class="badge badge-gray">inativo</span>':''}</div>
+        <div class="flex aic gap8" style="margin-top:2px">
+          <span class="c-gold f800 fs12">${fmtR(p.preco)}</span>
+          <span class="fs11 c-muted">/ ${p.unidade||'un'}</span>
+          ${p.controla_estoque?`<span class="fs11 c-muted">estq: ${p.quantidade_estoque}</span>`:''}
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="mEditProd('${p.id}')">✏️</button>
+    </div>`).join('');
+
+  return `<div class="sec-hdr"><span class="sec-title">CARDÁPIO</span>
+    <div class="flex gap8">
+      <button class="btn btn-ghost btn-sm" onclick="mCategorias()">🏷 Cats</button>
+      <button class="btn btn-primary btn-sm" onclick="mNewProd()">+ Produto</button>
+    </div></div>
+    <div id="ctabs">${tabs}</div>
+    <div class="card">${prodsH}</div>`;
+}
+function postCardapio() {
+  document.querySelectorAll('#ctabs .tab').forEach(t => {
+    t.onclick = () => { S.catTab = t.dataset.cat || null; render(); };
+  });
+}
+
+// ══════════════════════════════════════════════
+// MODAL: CATEGORIAS
+// ══════════════════════════════════════════════
+function mCategorias() {
+  function body() {
+    const list = !S.categorias.length
+      ? '<p class="fs12 c-muted tc">Nenhuma categoria</p>'
+      : S.categorias.map(c=>`<div class="li">
+          <div class="flex-1 f800">${c.nome}</div>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="doDelCat('${c.id}')">🗑</button>
+        </div>`).join('');
+    return `<div class="modal-title">Categorias</div>
+      <div class="card" style="margin-bottom:12px">${list}</div>
+      <div class="fg"><div class="lbl">Nova categoria</div>
+        <input class="inp" id="ncnome" placeholder="Nome da categoria"></div>
+      <div class="flex gap8">
+        <button class="btn btn-ghost flex-1" onclick="closeModal()">Fechar</button>
+        <button class="btn btn-primary flex-1" onclick="doNewCat()">+ Criar</button>
+      </div>`;
+  }
+  showModal(body());
+}
+async function doNewCat() {
+  const nome = document.getElementById('ncnome')?.value?.trim();
+  if (!nome) { toast('Digite um nome'); return; }
+  const cat = { id:uid(), nome, ordem:S.categorias.length };
+  S.categorias.push(cat);
+  await idbPut('categorias', cat);
+  if (S.online) { try { await sbPost('categorias', cat); }catch(e){} }
+  toast(`"${nome}" criada!`);
+  mCategorias();
+}
+async function doDelCat(id) {
+  if (S.produtos.some(p=>p.categoria_id===id)) { toast('Mova os produtos desta categoria primeiro'); return; }
+  S.categorias = S.categorias.filter(c=>c.id!==id);
+  await idbDel('categorias', id);
+  if (S.online) { try { await sbDel('categorias',`id=eq.${id}`); }catch(e){} }
+  toast('Removida');
+  mCategorias();
+}
+
+// ══════════════════════════════════════════════
+// MODAL: PRODUTO
+// ══════════════════════════════════════════════
+function prodForm(p) {
+  const opts = S.categorias.map(c=>`<option value="${c.id}" ${p&&c.id===p.categoria_id?'selected':''}>${c.nome}</option>`).join('');
+  return `
+    <div class="fg"><div class="lbl">Nome *</div><input class="inp" id="pn" value="${p?p.nome:''}" placeholder="Ex: Chope 300ml"></div>
+    <div class="fg"><div class="lbl">Categoria *</div>
+      <select class="inp" id="pc"><option value="">Selecione...</option>${opts}</select></div>
+    <div class="flex gap8">
+      <div class="fg flex-1"><div class="lbl">Preço (R$) *</div><input class="inp" id="pp" type="number" step="0.50" min="0" value="${p?p.preco:''}"></div>
+      <div class="fg flex-1"><div class="lbl">Unidade</div><input class="inp" id="pu" value="${p?p.unidade||'un':'un'}"></div>
+    </div>
+    <div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700">
+      <input type="checkbox" id="pe" ${(!p||p.controla_estoque)?'checked':''}> Controlar estoque
+    </label></div>
+    <div id="ef" style="${p&&!p.controla_estoque?'display:none':''}">
+      <div class="flex gap8">
+        <div class="fg flex-1"><div class="lbl">Qtd atual</div><input class="inp" id="pq" type="number" min="0" step="0.1" value="${p?p.quantidade_estoque:0}"></div>
+        <div class="fg flex-1"><div class="lbl">Mínimo</div><input class="inp" id="pm" type="number" min="0" step="0.1" value="${p?p.estoque_minimo:0}"></div>
+      </div>
+      <div class="fg">
+        <div class="lbl">Débito por venda</div>
+        <input class="inp" id="pf" type="number" min="0.001" step="0.001" value="${p?p.fator_estoque||1:1}">
+        <div class="fs11 c-muted" style="margin-top:4px">Quanto debita do estoque a cada unidade vendida. Ex: chope 500ml com estoque em litros → 0,5</div>
+      </div>
+    </div>
+    ${p?`<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700">
+      <input type="checkbox" id="pativo" ${p.ativo?'checked':''}> Produto ativo</label></div>`:''}`;
+}
+function mNewProd() {
+  showModal(`<div class="modal-title">Novo Produto</div>${prodForm(null)}
+    <div class="flex gap8 mt8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doSaveProd(null)">Salvar</button>
+    </div>`);
+  document.getElementById('pe').onchange = e => { document.getElementById('ef').style.display=e.target.checked?'':'none'; };
+}
+function mEditProd(id) {
+  const p = S.produtos.find(x=>x.id===id);
+  if (!p) return;
+  showModal(`<div class="modal-title">Editar Produto</div>${prodForm(p)}
+    <div class="flex gap8 mt8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doSaveProd('${id}')">Salvar</button>
+    </div>
+    <div class="divider"></div>
+    <button class="btn btn-danger w-full" onclick="doDelProd('${id}')">🗑️ Excluir produto</button>`);
+  document.getElementById('pe').onchange = e => { document.getElementById('ef').style.display=e.target.checked?'':'none'; };
+}
+async function doDelProd(id) {
+  const p = S.produtos.find(x=>x.id===id);
+  if (!p) return;
+  const abertas = new Set(S.comandas.map(c=>c.id));
+  const emUso = Object.values(S.itens).flat().some(i=>i.produto_id===id && abertas.has(i.comanda_id));
+  if (emUso) { toast('Produto está em comanda aberta — não é possível excluir'); return; }
+  if (!await customConfirm(`Excluir "${p.nome}"?\nEsta ação não pode ser desfeita.`, 'Excluir', true)) return;
+  S.produtos = S.produtos.filter(x=>x.id!==id);
+  await idbDel('produtos', id);
+  if (S.online) { try { await sbDel('produtos',`id=eq.${id}`); }catch(e){} }
+  closeModal(); toast(`"${p.nome}" excluído`); render();
+}
+async function doSaveProd(id) {
+  const nome = document.getElementById('pn')?.value?.trim();
+  const cat = document.getElementById('pc')?.value;
+  const preco = parseFloat(document.getElementById('pp')?.value);
+  const unidade = document.getElementById('pu')?.value?.trim()||'un';
+  const est = document.getElementById('pe')?.checked;
+  const qtd = parseFloat(document.getElementById('pq')?.value||0);
+  const min = parseFloat(document.getElementById('pm')?.value||0);
+  const fator = parseFloat(document.getElementById('pf')?.value||1);
+  const ativo = id ? (document.getElementById('pativo')?.checked??true) : true;
+  if (!nome||!cat||isNaN(preco)) { toast('Preencha nome, categoria e preço'); return; }
+  if (id) {
+    const p = S.produtos.find(x=>x.id===id);
+    Object.assign(p, { nome, categoria_id:cat, preco, unidade, controla_estoque:est, quantidade_estoque:qtd, estoque_minimo:min, fator_estoque:fator, ativo });
+    await idbPut('produtos', p);
+    if (S.online) { try { await sbPatch('produtos',`id=eq.${id}`,{nome,categoria_id:cat,preco,unidade,controla_estoque:est,quantidade_estoque:qtd,estoque_minimo:min,fator_estoque:fator,ativo}); }catch(e){} }
+    toast('Produto atualizado!');
+  } else {
+    const p = { id:uid(), nome, categoria_id:cat, preco, unidade, controla_estoque:est, quantidade_estoque:qtd, estoque_minimo:min, fator_estoque:fator, ativo:true, created_at:new Date().toISOString() };
+    S.produtos.push(p);
+    await idbPut('produtos', p);
+    if (S.online) { try { await sbPost('produtos', p); }catch(e){} }
+    toast(`"${nome}" criado!`);
+  }
+  closeModal(); render();
+}
+
+// ══════════════════════════════════════════════
+// PAGE: ESTOQUE
+// ══════════════════════════════════════════════
+function pgEstoque() {
+  const q = S.estoqSearch.toLowerCase();
+  const selCat = S.estoqCat;
+  const list = S.produtos.filter(p=>p.controla_estoque
+    &&(!q||p.nome.toLowerCase().includes(q))
+    &&(!selCat||p.categoria_id===selCat));
+  const baixos = list.filter(p=>p.estoque_minimo>0&&p.quantidade_estoque<=p.estoque_minimo);
+
+  let h = `<div class="sec-hdr"><span class="sec-title">ESTOQUE</span>
+    <div class="flex gap8">
+      <button class="btn btn-ghost btn-sm" onclick="mBaixaLivre('consumo_proprio')">🧉 Consumo</button>
+      <button class="btn btn-danger btn-sm" onclick="mBaixaLivre('desperdicio')">🗑️ Desperdício</button>
+    </div></div>`;
+  if (baixos.length) h += `<div class="alert alert-err"><strong>⚠️ Abaixo do mínimo:</strong><br>${baixos.map(p=>`${p.nome}: ${p.quantidade_estoque} ${p.unidade||'un'} (mín: ${p.estoque_minimo})`).join('<br>')}</div>`;
+  if (S.categorias.length) {
+    h += '<div class="tabs">'
+      + `<span class="tab ${!selCat?'active':''}" onclick="S.estoqCat=null;render()">Todos</span>`
+      + S.categorias.map(c=>`<span class="tab ${selCat===c.id?'active':''}" onclick="S.estoqCat='${c.id}';render()">${c.nome}</span>`).join('')
+      + '</div>';
+  }
+  h += `<input class="inp" placeholder="🔍 Buscar..." value="${S.estoqSearch}" oninput="S.estoqSearch=this.value;render()" style="margin-bottom:12px">`;
+
+  if (!list.length) {
+    h += `<div class="empty"><div class="empty-icon">📦</div><p>Nenhum produto com controle de estoque</p></div>`;
+    return h;
+  }
+
+  // Sort: baixo primeiro
+  list.sort((a,b) => {
+    const aB = a.estoque_minimo>0 && a.quantidade_estoque<=a.estoque_minimo;
+    const bB = b.estoque_minimo>0 && b.quantidade_estoque<=b.estoque_minimo;
+    return bB-aB || a.nome.localeCompare(b.nome);
+  });
+
+  h += '<div class="card">';
+  list.forEach(p => {
+    const pct = p.estoque_minimo>0 ? Math.min(100,(p.quantidade_estoque/(p.estoque_minimo*3))*100) : 60;
+    const cor = p.quantidade_estoque<=0 ? 'var(--red)' : p.quantidade_estoque<=p.estoque_minimo ? 'var(--yellow)' : 'var(--green)';
+    h += `<div class="li">
+      <div class="flex-1">
+        <div class="f700">${p.nome}</div>
+        <div class="fs12 c-muted">${p.quantidade_estoque} ${p.unidade||'un'}${p.estoque_minimo>0?' · mín: '+p.estoque_minimo:''}</div>
+        <div class="sbar"><div class="sbar-fill" style="width:${pct}%;background:${cor}"></div></div>
+      </div>
+      <div class="flex gap8">
+        <button class="btn btn-ghost btn-sm btn-icon" onclick="mEditProd('${p.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="mAjuste('${p.id}')">📊 Ajustar</button>
+      </div>
+    </div>`;
+  });
+  h += '</div>';
+  return h;
+}
+
+// ══════════════════════════════════════════════
+// MODAL: AJUSTE DE ESTOQUE
+// ══════════════════════════════════════════════
+function mAjuste(pid) {
+  const p = S.produtos.find(x=>x.id===pid);
+  if (!p) return;
+  const dica = p.fator_estoque && p.fator_estoque !== 1
+    ? `<div class="alert alert-warn" style="margin-bottom:10px">💡 Estoque em <strong>${p.unidade||'un'}</strong>. Cada unidade vendida debita <strong>${p.fator_estoque}</strong>. Ex: 1 unidade de "${p.nome}" = digitar ${p.fator_estoque}</div>` : '';
+  showModal(`
+    <div class="modal-title">Ajuste — ${p.nome}</div>
+    <p class="fs12 c-muted" style="margin-bottom:10px">Atual: <strong style="color:var(--text)">${p.quantidade_estoque} ${p.unidade||'un'}</strong></p>
+    ${dica}
+    <div class="fg"><div class="lbl">Tipo</div>
+      <select class="inp" id="atipo" onchange="document.getElementById('albl').textContent=this.value==='ajuste'?'Nova quantidade total':'Quantidade'">
+        <option value="entrada">📦 Entrada (compra / reposição)</option>
+        <option value="desperdicio">🗑️ Desperdício / Perda</option>
+        <option value="consumo_proprio">🧉 Consumo próprio</option>
+        <option value="ajuste">🔧 Ajuste de inventário</option>
+      </select></div>
+    <div class="fg"><div class="lbl" id="albl">Quantidade</div>
+      <input class="inp" id="aqtd" type="number" min="0" step="0.1" value="1"></div>
+    <div class="fg"><div class="lbl">Observação</div>
+      <input class="inp" id="aobs" placeholder="Opcional"></div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doAjuste('${pid}')">Confirmar</button>
+    </div>`);
+}
+async function doAjuste(pid) {
+  const p = S.produtos.find(x=>x.id===pid);
+  if (!p) return;
+  const tipo = document.getElementById('atipo').value;
+  const qtd = parseFloat(document.getElementById('aqtd').value||0);
+  const obs = document.getElementById('aobs').value;
+  let nova = p.quantidade_estoque;
+  if (tipo==='entrada') nova += qtd;
+  else if (tipo==='desperdicio'||tipo==='consumo_proprio') nova = Math.max(0,nova-qtd);
+  else nova = qtd;
+  p.quantidade_estoque = nova;
+  await idbPut('produtos', p);
+  const mov = { id:uid(), produto_id:pid, tipo, quantidade:qtd, observacao:obs, created_at:new Date().toISOString() };
+  await idbPut('movimentacoes_estoque', mov);
+  if (S.online) {
+    try { await sbPatch('produtos',`id=eq.${pid}`,{quantidade_estoque:nova}); await sbPost('movimentacoes_estoque',mov); }catch(e){}
+  }
+  await registrarLog('Ajuste estoque', `${p.nome}: ${tipo} de ${qtd} ${p.unidade||'un'}`);
+  closeModal(); toast(`Estoque: ${nova} ${p.unidade||'un'}`); render();
+}
+
+// ══════════════════════════════════════════════
+// PAGE: CAIXA
+// ══════════════════════════════════════════════
+function pgCaixa() {
+  if (!S.caixaSessao) return `
+    <div class="sec-hdr"><span class="sec-title">CAIXA</span></div>
+    <div class="empty" style="padding:60px 20px">
+      <div class="empty-icon">💰</div>
+      <p>Caixa fechado</p>
+      <button class="btn btn-primary mt12" onclick="mAbrirCaixa()">Abrir Caixa</button>
+    </div>`;
+  return `<div class="sec-hdr"><span class="sec-title">CAIXA</span>
+    <span class="badge badge-g">● ABERTO</span></div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="fs11 c-muted">Aberto às ${fmtT(S.caixaSessao.abertura_at)} · abertura ${fmtR(S.caixaSessao.valor_abertura)}</div>
+    </div>
+    <div id="caixaBody"><div class="tc" style="padding:20px"><div class="spin"></div></div></div>
+    <div class="flex gap8 mt12">
+      <button class="btn btn-ghost flex-1" onclick="mMovCaixa()">+ Lançamento</button>
+      <button class="btn btn-danger flex-1" onclick="mFecharCaixa()">Fechar Caixa</button>
+    </div>`;
+}
+async function postCaixa() {
+  const el = document.getElementById('caixaBody');
+  if (!el) return;
+  const movs = (await idbAll('caixa_movimentacoes'))
+    .filter(m=>m.sessao_id===S.caixaSessao.id)
+    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const ent = movs.filter(m=>m.tipo==='entrada').reduce((s,m)=>s+m.valor,0);
+  const sai = movs.filter(m=>m.tipo!=='entrada').reduce((s,m)=>s+m.valor,0);
+  const total = ent-sai+(S.caixaSessao.valor_abertura||0);
+  // Load closed comandas for this session
+  const todasComandas = await idbAll('comandas');
+  const todosItens = await idbAll('itens_comanda');
+  const comandasFechadas = todasComandas
+    .filter(c => c.status === 'fechada' && c.fechamento_at)
+    .sort((a,b) => new Date(b.fechamento_at) - new Date(a.fechamento_at))
+    .slice(0, 50);
+
+  const comandasHtml = !comandasFechadas.length ? '<p class="fs12 c-muted tc">Nenhuma comanda finalizada</p>' :
+    comandasFechadas.map(c => {
+      const mesa = getMesa(c.mesa_id);
+      const nomeForma = {dinheiro:'💵',cartao_credito:'💳 Cred',cartao_debito:'💳 Déb',pix:'📱',dividido:'👥'}[c.forma_pagamento]||c.forma_pagamento||'';
+      return '<div class="li" style="cursor:pointer" onclick="mVerComanda(\'' + c.id + '\')">'
+        + '<div class="flex-1">'
+        + '<div class="f700 fs12">Mesa ' + (mesa?mesa.numero:'?') + (c.nome_cliente?' — '+c.nome_cliente:'') + '</div>'
+        + '<div class="fs11 c-muted">' + new Date(c.fechamento_at).toLocaleDateString('pt-BR') + ' ' + fmtT(c.fechamento_at) + ' · ' + nomeForma + '</div>'
+        + '</div>'
+        + '<div class="c-gold f800">' + fmtR(c.total) + ' ›</div>'
+        + '</div>';
+    }).join('');
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:10px">
+      <div class="tr"><span class="c-green">Entradas</span><span class="c-green f800">${fmtR(ent)}</span></div>
+      <div class="tr"><span class="c-red">Saídas</span><span class="c-red f800">− ${fmtR(sai)}</span></div>
+      <div class="tr big"><span>TOTAL</span><span>${fmtR(total)}</span></div>
+    </div>
+    <div class="fs11 c-muted f800" style="margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase">Comandas finalizadas</div>
+    <div class="card" style="margin-bottom:10px">${comandasHtml}</div>
+    <div class="fs11 c-muted f800" style="margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase">Movimentações</div>
+    <div class="card">${!movs.length?'<p class="fs12 c-muted tc">Nenhuma movimentação</p>':
+      movs.slice(0,30).map(m=>'<div class="li"><div class="flex-1"><div style="font-size:13px;font-weight:700">'+( m.descricao||m.tipo)+'</div><div class="fs11 c-muted">'+fmtT(m.created_at)+(m.forma_pagamento?' · '+m.forma_pagamento:'')+'</div></div><div style="font-weight:800;color:'+(m.tipo==='entrada'?'var(--green)':'var(--red)')+'">'+( m.tipo==='entrada'?'+':'−')+' '+fmtR(m.valor)+'</div></div>').join('')
+    }</div>`;
+}
+function mAbrirCaixa() {
+  showModal(`<div class="modal-title">Abrir Caixa</div>
+    <div class="fg"><div class="lbl">Valor de abertura (troco inicial)</div>
+      <input class="inp" id="caval" type="number" min="0" step="0.50" value="0"></div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doAbrirCaixa()">Abrir</button>
+    </div>`);
+}
+async function doAbrirCaixa() {
+  const val = parseFloat(document.getElementById('caval').value||0);
+  const sessao = { id:uid(), abertura_at:new Date().toISOString(), status:'aberta', valor_abertura:val };
+  S.caixaSessao = sessao;
+  await idbPut('caixa_sessoes', sessao);
+  if (S.online) { try { await sbPost('caixa_sessoes', sessao); }catch(e){} }
+  await registrarLog('Abrir caixa', `Valor de abertura: ${fmtR(val)}`);
+  closeModal(); toast('Caixa aberto!'); render();
+}
+function mMovCaixa() {
+  showModal(`<div class="modal-title">Lançamento Manual</div>
+    <div class="fg"><div class="lbl">Tipo</div>
+      <select class="inp" id="mt">
+        <option value="entrada">📥 Reforço (entrada)</option>
+        <option value="sangria">📤 Sangria (retirada)</option>
+      </select></div>
+    <div class="fg"><div class="lbl">Valor (R$)</div>
+      <input class="inp" id="mv" type="number" min="0" step="0.50"></div>
+    <div class="fg"><div class="lbl">Descrição</div>
+      <input class="inp" id="md" placeholder="Opcional"></div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doMovCaixa()">Confirmar</button>
+    </div>`);
+}
+async function doMovCaixa() {
+  const tipo = document.getElementById('mt').value;
+  const val = parseFloat(document.getElementById('mv').value||0);
+  const desc = document.getElementById('md').value;
+  if (!val||val<=0) { toast('Digite um valor'); return; }
+  const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo, valor:val, descricao:desc||tipo, created_at:new Date().toISOString() };
+  await idbPut('caixa_movimentacoes', mov);
+  if (S.online) { try { await sbPost('caixa_movimentacoes', mov); }catch(e){} }
+  closeModal(); toast('Registrado!'); render();
+}
+async function mFecharCaixa() {
+  const movs = (await idbAll('caixa_movimentacoes')).filter(m=>m.sessao_id===S.caixaSessao.id);
+  const ent = movs.filter(m=>m.tipo==='entrada').reduce((s,m)=>s+m.valor,0);
+  const sai = movs.filter(m=>m.tipo!=='entrada').reduce((s,m)=>s+m.valor,0);
+  const esp = ent-sai+(S.caixaSessao.valor_abertura||0);
+  const mesasAbertas = S.comandas.length;
+
+  showModal(`<div class="modal-title">Fechar Caixa</div>
+    ${mesasAbertas>0?`<div class="alert alert-warn">⚠️ ${mesasAbertas} mesa(s) ainda abertas!</div>`:''}
+    <div class="card" style="margin-bottom:12px">
+      <div class="tr"><span>Abertura</span><span>${fmtR(S.caixaSessao.valor_abertura)}</span></div>
+      <div class="tr"><span class="c-green">Entradas</span><span class="c-green">${fmtR(ent)}</span></div>
+      <div class="tr"><span class="c-red">Saídas</span><span class="c-red">− ${fmtR(sai)}</span></div>
+      <div class="tr big"><span>ESPERADO</span><span>${fmtR(esp)}</span></div>
+    </div>
+    <div class="fg"><div class="lbl">Valor contado no caixa</div>
+      <input class="inp" id="cfv" type="number" min="0" step="0.50" placeholder="0,00"></div>
+    <div class="fg"><div class="lbl">Observação</div>
+      <input class="inp" id="cfo" placeholder="Opcional"></div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger flex-1" onclick="doFecharCaixa(${esp})">Fechar</button>
+    </div>`);
+}
+async function doFecharCaixa(esp) {
+  const contado = parseFloat(document.getElementById('cfv').value||0);
+  const obs = document.getElementById('cfo').value;
+  const diff = contado - esp;
+  Object.assign(S.caixaSessao, { status:'fechada', fechamento_at:new Date().toISOString(), valor_fechamento_informado:contado, observacao:obs });
+  await idbPut('caixa_sessoes', S.caixaSessao);
+  if (S.online) { try { await sbPatch('caixa_sessoes',`id=eq.${S.caixaSessao.id}`,{status:'fechada',fechamento_at:S.caixaSessao.fechamento_at,valor_fechamento_informado:contado,observacao:obs}); }catch(e){} }
+  await registrarLog('Fechar caixa', `Esperado: ${fmtR(esp)} · Contado: ${fmtR(contado)}`);
+  S.caixaSessao = null;
+  closeModal();
+  const msg = diff===0 ? '✅ Caixa fechado! Sem diferença.' : diff>0 ? `✅ Fechado! Sobra: ${fmtR(diff)}` : `⚠️ Fechado! Falta: ${fmtR(Math.abs(diff))}`;
+  toast(msg, 5000); render();
+}
+
+// ══════════════════════════════════════════════
+// PAGE: CONFIGURAÇÕES
+// ══════════════════════════════════════════════
+function pgConfig() {
+  const cv = S.couvert;
+  var _grps = { Mesa:[], Bistro:[] };
+  S.mesas.forEach(function(m){ var c=m.categoria||'Mesa'; if(!_grps[c]) _grps[c]=[]; _grps[c].push(m); });
+  var _secoes = [['Mesa','🪑 Mesas'],['Bistro','☕ Bistrôs']].filter(function(p){ return _grps[p[0]]&&_grps[p[0]].length>0; });
+  var mesaList = '';
+  if (!S.mesas.length) {
+    mesaList = '<p class="fs12 c-muted">Nenhuma mesa</p>';
+  } else {
+    _secoes.forEach(function(pair){
+      var cat=pair[0], label=pair[1];
+      mesaList += '<div style="font-family:Bebas Neue,sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold);margin:12px 0 4px">'+label+'</div>';
+      _grps[cat].forEach(function(m){
+        var _pre = (m.categoria==='Bistro' ? 'Bistrô' : 'Mesa');
+        mesaList += '<div class="li"><div class="flex-1"><span class="f800">' + _pre + ' ' + m.numero + (m.nome ? ' — ' + m.nome : '') + '</span>' + (m.lugares ? ' <span class="fs11 c-muted">· ' + m.lugares + ' lugares</span>' : '') + '</div><button class="btn btn-danger btn-sm btn-icon" data-rmid="' + m.id + '" onclick="doRmMesa(this.dataset.rmid)">🗑</button></div>';
+      });
+    });
+  }
+
+  return `<div class="sec-title" style="margin-bottom:14px">CONFIGURAÇÕES</div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div class="flex aic jsb" style="margin-bottom:10px">
+        <div class="f800">🎵 Couvert Artístico</div>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:700">
+          <input type="checkbox" id="cvAtivo" ${cv.ativo?'checked':''}> Ativo</label>
+      </div>
+      <div id="cvField" style="${cv.ativo?'':'display:none'}">
+        <div class="lbl">Valor por pessoa (R$)</div>
+        <div class="flex gap8 mt8">
+          <input class="inp flex-1" id="cvValor" type="number" min="0" step="0.50" value="${cv.valor||0}">
+          <button class="btn btn-primary" onclick="doSaveCouvert()">Salvar</button>
+        </div>
+      </div>
+      ${!cv.ativo?'<p class="fs12 c-muted">Ative para cobrar couvert automático nas mesas</p>':''}
+    </div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div class="flex aic jsb" style="margin-bottom:10px">
+        <div class="f800">🪑 Mesas e Bistrôs</div>
+        <div class="flex gap8">
+          <button class="btn btn-ghost btn-sm" onclick="mNovaMesa('Bistro')" style="background:var(--bg3);border-color:var(--gold);color:var(--gold)">+ Bistrô</button>
+          <button class="btn btn-primary btn-sm" onclick="mNovaMesa('Mesa')">+ Mesa</button>
+        </div>
+      </div>
+      ${mesaList}
+    </div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div class="flex aic jsb" style="margin-bottom:10px">
+        <div class="f800">👥 Usuários</div>
+        <button class="btn btn-primary btn-sm" onclick="mNovoUsuario()">+ Usuário</button>
+      </div>
+      <div id="userList"><div class="spin" style="margin:8px auto;display:block;width:18px"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="f800" style="margin-bottom:8px">🔗 Supabase</div>
+      <div class="fs12 c-muted" style="margin-bottom:8px">
+        Status: <span style="color:${S.online?'var(--green)':'var(--red)'}">● ${S.online?'Online':'Offline'}</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doSync()">🔄 Carregar do Supabase</button>
+      <button class="btn btn-primary btn-sm mt8" onclick="syncQueue()">⬆️ Enviar tudo ao Supabase</button>
+      <div class="fs11 c-muted mt8">Use "Enviar tudo" se abrir em outro dispositivo e faltar dados.</div>
+    </div>`;
+}
+function postConfig() {
+  loadUserList();
+  const el = document.getElementById('cvAtivo');
+  if (el) el.onchange = async e => {
+    document.getElementById('cvField').style.display = e.target.checked ? '' : 'none';
+    if (!e.target.checked) await doSaveCouvertVal(0, false);
+  };
+}
+async function loadUserList() {
+  const el = document.getElementById('userList');
+  if (!el) return;
+  const users = lsUsers();
+  if (!users.length) { el.innerHTML = '<p class="fs12 c-muted">Nenhum usuário</p>'; return; }
+  el.innerHTML = users.map(u => `<div class="li">
+    <div class="flex-1">
+      <div class="f800">${u.nome}</div>
+      <div class="fs11 c-muted">${u.usuario} · ${u.perfil}${!u.ativo?' · <span style="color:var(--red)">inativo</span>':''}</div>
+    </div>
+    ${u.id !== S.currentUser?.id ? `<button class="btn btn-danger btn-sm btn-icon" onclick="toggleUsuario('${u.id}',${u.ativo})">
+      ${u.ativo?'🔒':'🔓'}</button>` : '<span class="badge badge-g">você</span>'}
+  </div>`).join('');
+}
+
+function mNovoUsuario() {
+  showModal(`<div class="modal-title">Novo Usuário</div>
+    <div class="fg"><div class="lbl">Nome completo *</div><input class="inp" id="unome" placeholder="Ex: Maria Silva"></div>
+    <div class="fg"><div class="lbl">Usuário (login) *</div><input class="inp" id="ulogin" placeholder="Ex: maria"></div>
+    <div class="fg"><div class="lbl">Senha *</div><input class="inp" type="password" id="usenha" placeholder="Mínimo 4 caracteres"></div>
+    <div class="fg"><div class="lbl">Perfil</div>
+      <select class="inp" id="uperfil">
+        <option value="operador">Operador</option>
+        <option value="admin">Administrador</option>
+      </select></div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doNovoUsuario()">Criar</button>
+    </div>`);
+}
+
+async function doNovoUsuario() {
+  const nome = document.getElementById('unome')?.value?.trim();
+  const usuario = document.getElementById('ulogin')?.value?.trim().toLowerCase();
+  const senha = document.getElementById('usenha')?.value;
+  const perfil = document.getElementById('uperfil')?.value;
+  if (!nome||!usuario||!senha) { toast('Preencha todos os campos'); return; }
+  if (senha.length < 4) { toast('Senha muito curta'); return; }
+  const existing = (lsUsers()).find(u=>u.usuario===usuario);
+  if (existing) { toast('Usuário já existe'); return; }
+  const hash = await hashPass(senha);
+  const u = { id:uid(), nome, usuario, senha_hash:hash, perfil, ativo:true, created_at:new Date().toISOString() };
+  lsPutUser( u);
+  if (S.online) { try { await sbPost('usuarios', u); }catch(e){} }
+  await registrarLog('Novo usuário', `${nome} (${usuario}) criado por ${S.currentUser?.nome}`);
+  closeModal(); toast(`Usuário "${nome}" criado!`); render();
+}
+
+async function toggleUsuario(id, ativo) {
+  const users = lsUsers();
+  const u = users.find(x=>x.id===id);
+  if (!u) return;
+  u.ativo = !ativo;
+  lsPutUser( u);
+  if (S.online) { try { await sbPatch('usuarios',`id=eq.${id}`,{ativo:u.ativo}); }catch(e){} }
+  toast(u.ativo ? `${u.nome} reativado` : `${u.nome} desativado`);
+  loadUserList();
+}
+
+async function doSaveCouvert() {
+  const val = parseFloat(document.getElementById('cvValor').value||0);
+  await doSaveCouvertVal(val, true);
+}
+async function doSaveCouvertVal(valor, ativo) {
+  const cfg = { id:uid(), valor, ativo, criado_em:new Date().toISOString() };
+  S.couvert = cfg;
+  await idbPut('couvert_config', cfg);
+  if (S.online) { try { await sbPost('couvert_config', cfg); }catch(e){} }
+  toast(ativo ? `Couvert ${fmtR(valor)}/pessoa ativado!` : 'Couvert desativado');
+}
+function mNovaMesa(catPreset) {
+  catPreset = catPreset || 'Mesa';
+  var catLabel = catPreset === 'Bistro' ? 'Bistrô' : 'Mesa';
+  showModal(`<div class="modal-title">Novo(a) ${catLabel}</div>
+    <div class="flex gap8">
+      <div class="fg flex-1"><div class="lbl">Número *</div>
+        <input class="inp" id="mnum" type="number" min="1" placeholder="Ex: 1"></div>
+      <div class="fg flex-1"><div class="lbl">Lugares</div>
+        <input class="inp" id="mlugares" type="number" min="1" placeholder="Ex: 4"></div>
+    </div>
+    <div class="fg" style="display:none"><input type="hidden" id="mcat" value="${catPreset}"></div>
+    <div class="fs12 c-muted" style="margin-bottom:10px">Categoria: <strong>${catLabel}</strong></div>
+    <div class="fg"><div class="lbl">Nome / identificação (opcional)</div>
+      <input class="inp" id="mnome" placeholder="Ex: Varanda, VIP..."></div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doNovaMesa()">Criar</button>
+    </div>`);
+}
+async function doNovaMesa() {
+  try {
+    const num = parseInt(document.getElementById('mnum')?.value);
+    const nome = document.getElementById('mnome')?.value?.trim()||'';
+    const lugares = parseInt(document.getElementById('mlugares')?.value)||0;
+    const categoria = document.getElementById('mcat')?.value||'Mesa';
+    if (!num||num<1) { toast('Digite um número válido'); return; }
+    if (S.mesas.some(m=>m.numero===num && (m.categoria||'Mesa')===categoria)) { await customAlert('Já existe um(a) ' + (categoria==='Bistro'?'Bistrô':'Mesa') + ' com este número.', '🪑'); return; }
+    const mesa = { id:uid(), numero:num, nome, lugares, categoria, ativa:true };
+    S.mesas.push(mesa); S.mesas.sort((a,b)=>a.numero-b.numero);
+    await idbPut('mesas', mesa);
+    if (S.online) { try { await sbPost('mesas', mesa); }catch(e){ console.warn('Supabase mesas:',e); } }
+    closeModal(); toast(`Mesa ${num} criada!`); render();
+  } catch(e) {
+    toast('Erro ao salvar mesa: ' + e.message);
+    console.error(e);
+  }
+}
+async function doRmMesa(id) {
+  if (getComanda(id)) { toast('Feche a comanda desta mesa primeiro'); return; }
+  const mesa = getMesa(id); if (!mesa) return;
+  mesa.ativa = false;
+  S.mesas = S.mesas.filter(m=>m.id!==id);
+  await idbPut('mesas', mesa);
+  if (S.online) { try { await sbPatch('mesas',`id=eq.${id}`,{ativa:false}); }catch(e){} }
+  toast('Mesa removida'); render();
+}
+async function doSync() {
+  if (!S.online) { toast('Sem conexão'); return; }
+  toast('Sincronizando...');
+  await syncQueue();
+  await loadRemote();
+  render();
+  toast('Sincronizado! ✓');
+}
+
+// ══════════════════════════════════════════════
+// PAGE: RELATÓRIOS
+// ══════════════════════════════════════════════
+function pgRelatorios() {
+  const hoje = new Date().toISOString().slice(0,10);
+  return `
+    <div class="sec-hdr"><span class="sec-title">RELATÓRIOS</span></div>
+
+    <div class="tabs" id="relTabs">
+      <span class="tab active" data-rel="caixa">💰 Caixa</span>
+      <span class="tab" data-rel="estoque">📦 Estoque</span>
+      <span class="tab" data-rel="log">📋 Log</span>
+    </div>
+
+    <div class="flex gap8" style="margin-bottom:14px">
+      <div class="flex-1">
+        <div class="lbl">De</div>
+        <input class="inp" type="date" id="relDe" value="${hoje}">
+      </div>
+      <div class="flex-1">
+        <div class="lbl">Até</div>
+        <input class="inp" type="date" id="relAte" value="${hoje}">
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:6px">
+        <button class="btn btn-primary" onclick="gerarRelatorio()">Gerar</button>
+        <button class="btn btn-ghost no-print" id="btnExport" style="display:none" onclick="exportarRelatorio()">📥</button>
+      </div>
+    </div>
+
+    <div id="relConteudo"><p class="fs12 c-muted tc" style="padding:30px">Selecione o período e clique em Gerar</p></div>
+  `;
+}
+
+function postRelatorios() {
+  document.querySelectorAll('#relTabs .tab').forEach(t => {
+    t.onclick = () => {
+      document.querySelectorAll('#relTabs .tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('relConteudo').innerHTML = '<p class="fs12 c-muted tc" style="padding:30px">Selecione o período e clique em Gerar</p>';
+      const btn = document.getElementById('btnExport');
+      if (btn) btn.style.display='none';
+    };
+  });
+}
+
+function exportarRelatorio() {
+  window.print();
+}
+
+async function gerarRelatorio() {
+  const tipo = document.querySelector('#relTabs .tab.active')?.dataset.rel || 'caixa';
+  const de = document.getElementById('relDe').value;
+  const ate = document.getElementById('relAte').value;
+  if (!de || !ate) { toast('Selecione o período'); return; }
+  const deDate = new Date(de + 'T00:00:00');
+  const ateDate = new Date(ate + 'T23:59:59');
+  const el = document.getElementById('relConteudo');
+  el.innerHTML = '<div class="tc" style="padding:20px"><div class="spin"></div></div>';
+
+  const btnExp = document.getElementById('btnExport');
+  if (btnExp) btnExp.style.display='flex';
+  if (tipo === 'caixa') await relCaixa(el, deDate, ateDate);
+  else if (tipo === 'estoque') await relEstoque(el, deDate, ateDate);
+  else await relLog(el, deDate, ateDate);
+}
+
+async function relCaixa(el, de, ate) {
+  const allMovs = (await idbAll('caixa_movimentacoes'))
+    .filter(m => { const d = new Date(m.created_at); return d >= de && d <= ate; })
+    .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+  const allComandas = (await idbAll('comandas'))
+    .filter(c => c.status === 'fechada' && c.fechamento_at)
+    .filter(c => { const d = new Date(c.fechamento_at); return d >= de && d <= ate; });
+
+  const allItens = await idbAll('itens_comanda');
+
+  const entradas = allMovs.filter(m => m.tipo === 'entrada');
+  const saidas = allMovs.filter(m => m.tipo !== 'entrada');
+  const totalEnt = entradas.reduce((s,m) => s+m.valor, 0);
+  const totalSai = saidas.reduce((s,m) => s+m.valor, 0);
+  const totalLiq = totalEnt - totalSai;
+
+  const porForma = {};
+  entradas.forEach(m => {
+    const f = m.forma_pagamento || 'outros';
+    if (!porForma[f]) porForma[f] = 0;
+    porForma[f] += m.valor;
+  });
+
+  const nomes = { dinheiro:'💵 Dinheiro', cartao_credito:'💳 Crédito', cartao_debito:'💳 Débito', pix:'📱 Pix', dividido:'👥 Dividido', outros:'Outros' };
+  const formaRows = Object.entries(porForma)
+    .sort((a,b) => b[1]-a[1])
+    .map(([f,v]) => `<div class="tr"><span class="c-muted">${nomes[f]||f}</span><span class="f800">${fmtR(v)}</span></div>`).join('');
+
+  const ticketMedio = allComandas.length ? totalEnt / allComandas.length : 0;
+
+  // Mesas fechadas com detalhe
+  const mesasRows = allComandas.sort((a,b)=>new Date(b.fechamento_at)-new Date(a.fechamento_at)).map(c => {
+    const mesa = getMesa(c.mesa_id);
+    const itens = allItens.filter(i => i.comanda_id === c.id);
+    const itensG = groupItens(itens);
+    const itensHtml = itensG.map(i => {
+      const p = getProd(i.produto_id);
+      return `<div class="tr" style="padding:3px 0 3px 12px"><span class="fs12 c-muted">${i.quantidade}x ${p?p.nome:'?'}</span><span class="fs12">${fmtR(i.quantidade*i.preco_unitario)}</span></div>`;
+    }).join('');
+    return `<div style="border-bottom:1px solid var(--border);padding:8px 0">
+      <div class="flex aic jsb" style="cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <div>
+          <span class="f800">Mesa ${mesa?mesa.numero:'?'}${c.nome_cliente?' — '+c.nome_cliente:''}</span>
+          <span class="fs11 c-muted"> · ${fmtT(c.fechamento_at)} · ${nomes[c.forma_pagamento]||c.forma_pagamento||''}</span>
+        </div>
+        <span class="c-gold f800">${fmtR(c.total)} ▾</span>
+      </div>
+      <div style="display:none">${itensHtml||'<p class="fs11 c-muted" style="padding:4px 12px">Sem itens</p>'}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:10px">
+      <div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Resumo</div>
+      <div class="tr"><span class="c-green">Total entradas</span><span class="c-green f800">${fmtR(totalEnt)}</span></div>
+      <div class="tr"><span class="c-red">Total saídas</span><span class="c-red f800">− ${fmtR(totalSai)}</span></div>
+      <div class="tr big"><span>LÍQUIDO</span><span>${fmtR(totalLiq)}</span></div>
+      <div class="divider"></div>
+      <div class="tr"><span class="c-muted">Mesas fechadas</span><span class="f800">${allComandas.length}</span></div>
+      <div class="tr"><span class="c-muted">Ticket médio</span><span class="f800">${fmtR(ticketMedio)}</span></div>
+    </div>
+
+    ${formaRows ? `<div class="card" style="margin-bottom:10px">
+      <div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Por forma de pagamento</div>
+      ${formaRows}
+    </div>` : ''}
+
+    ${mesasRows ? `<div class="card" style="margin-bottom:10px">
+      <div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Mesas fechadas — clique para ver detalhes</div>
+      ${mesasRows}
+    </div>` : ''}
+
+    <div class="card">
+      <div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Todas as movimentações (${allMovs.length})</div>
+      ${!allMovs.length ? '<p class="fs12 c-muted tc">Nenhuma movimentação no período</p>' :
+        allMovs.map(m => `<div class="li">
+          <div class="flex-1">
+            <div class="f700 fs12">${m.descricao||m.tipo}</div>
+            <div class="fs11 c-muted">${new Date(m.created_at).toLocaleDateString('pt-BR')} ${fmtT(m.created_at)}${m.forma_pagamento?' · '+m.forma_pagamento:''}</div>
+          </div>
+          <div style="font-weight:800;color:${m.tipo==='entrada'?'var(--green)':'var(--red)'}">
+            ${m.tipo==='entrada'?'+':'−'} ${fmtR(m.valor)}</div>
+        </div>`).join('')
+      }
+    </div>`;
+}
+
+async function relEstoque(el, de, ate) {
+  const movs = (await idbAll('movimentacoes_estoque'))
+    .filter(m => { const d = new Date(m.created_at); return d >= de && d <= ate; })
+    .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+  const baixos = S.produtos.filter(p => p.controla_estoque && p.estoque_minimo > 0 && p.quantidade_estoque <= p.estoque_minimo);
+
+  const entradas = movs.filter(m => m.tipo === 'entrada');
+  const desperdicio = movs.filter(m => m.tipo === 'desperdicio');
+  const consumo = movs.filter(m => m.tipo === 'consumo_proprio');
+
+  // Consumo das mesas no período
+  const allComandas = (await idbAll('comandas'))
+    .filter(c => c.status === 'fechada' && c.fechamento_at)
+    .filter(c => { const d = new Date(c.fechamento_at); return d >= de && d <= ate; });
+  const comandaIds = new Set(allComandas.map(c=>c.id));
+  const allItens = (await idbAll('itens_comanda')).filter(i => comandaIds.has(i.comanda_id));
+
+  // Aggregate vendas por produto
+  const vendasMap = {};
+  allItens.forEach(i => {
+    if (!vendasMap[i.produto_id]) vendasMap[i.produto_id] = { qtd:0, total:0 };
+    vendasMap[i.produto_id].qtd += i.quantidade;
+    vendasMap[i.produto_id].total += i.quantidade * i.preco_unitario;
+  });
+
+  const vendasRows = Object.entries(vendasMap)
+    .sort((a,b) => b[1].qtd - a[1].qtd)
+    .map(([pid, v]) => {
+      const p = getProd(pid);
+      return `<div class="tr"><span class="f700">${p?p.nome:pid}</span>
+        <span><span class="f800">${v.qtd} ${p?p.unidade||'un':''}</span> <span class="c-muted fs11">· ${fmtR(v.total)}</span></span></div>`;
+    }).join('');
+
+  // Top 3 por categoria
+  const rankingCats = S.categorias.map(cat => {
+    const prods = S.produtos.filter(p => p.categoria_id === cat.id);
+    const ranked = prods
+      .map(p => ({ p, v: vendasMap[p.id] || { qtd:0, total:0 } }))
+      .filter(x => x.v.qtd > 0)
+      .sort((a,b) => b.v.qtd - a.v.qtd)
+      .slice(0,3);
+    if (!ranked.length) return '';
+    const medals = ['🥇','🥈','🥉'];
+    return `<div style="margin-bottom:10px">
+      <div class="fs12 f800" style="color:var(--gold);margin-bottom:4px">${cat.nome}</div>
+      ${ranked.map((x,i)=>`<div class="tr" style="padding:3px 0">
+        <span>${medals[i]} ${x.p.nome}</span>
+        <span class="f800">${x.v.qtd} ${x.p.unidade||'un'}</span>
+      </div>`).join('')}
+    </div>`;
+  }).filter(Boolean).join('');
+
+  const estoqueRows = S.produtos
+    .filter(p => p.controla_estoque)
+    .sort((a,b) => {
+      const aB = a.estoque_minimo > 0 && a.quantidade_estoque <= a.estoque_minimo;
+      const bB = b.estoque_minimo > 0 && b.quantidade_estoque <= b.estoque_minimo;
+      return bB - aB || a.nome.localeCompare(b.nome);
+    })
+    .map(p => {
+      const cor = p.quantidade_estoque <= 0 ? 'var(--red)' : p.quantidade_estoque <= p.estoque_minimo ? 'var(--yellow)' : 'var(--green)';
+      const status = p.quantidade_estoque <= 0 ? '● Zerado' : p.quantidade_estoque <= p.estoque_minimo ? '● Baixo' : '● OK';
+      return `<div class="tr"><span class="f700">${p.nome}</span>
+        <span style="color:${cor}">${p.quantidade_estoque} ${p.unidade||'un'} <span class="fs11">${status}</span></span></div>`;
+    }).join('');
+
+  el.innerHTML = `
+    ${baixos.length ? `<div class="alert alert-err" style="margin-bottom:10px">⚠️ ${baixos.length} produto(s) abaixo do mínimo</div>` : ''}
+
+    ${rankingCats ? `<div class="card" style="margin-bottom:10px">
+      <div class="fs11 c-muted f800" style="margin-bottom:10px;letter-spacing:.5px;text-transform:uppercase">🏆 Ranking por categoria</div>
+      ${rankingCats}
+    </div>` : ''}
+
+    ${vendasRows ? `<div class="card" style="margin-bottom:10px">
+      <div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Consumo das mesas no período</div>
+      ${vendasRows}
+    </div>` : ''}
+
+    <div class="card" style="margin-bottom:10px">
+      <div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Movimentações manuais</div>
+      <div class="tr"><span class="c-muted">Entradas (reposição)</span><span class="f800 c-green">${entradas.length} lançamentos</span></div>
+      <div class="tr"><span class="c-muted">Consumo próprio</span><span class="f800">${consumo.length} lançamentos</span></div>
+      <div class="tr"><span class="c-muted">Desperdício / perda</span><span class="f800 c-red">${desperdicio.length} lançamentos</span></div>
+    </div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Estoque atual</div>
+      ${estoqueRows || '<p class="fs12 c-muted tc">Nenhum produto com controle de estoque</p>'}
+    </div>
+
+    <div class="card">
+      <div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Histórico manual no período</div>
+      ${!movs.length ? '<p class="fs12 c-muted tc">Nenhuma movimentação manual no período</p>' :
+        movs.map(m => {
+          const p = getProd(m.produto_id);
+          const tipoLabel = {entrada:'📦 Entrada', desperdicio:'🗑️ Desperdício', consumo_proprio:'🧉 Consumo', ajuste:'🔧 Ajuste'}[m.tipo]||m.tipo;
+          return `<div class="li">
+            <div class="flex-1">
+              <div class="f700 fs12">${tipoLabel} — ${p?p.nome:'Produto'}</div>
+              <div class="fs11 c-muted">${new Date(m.created_at).toLocaleDateString('pt-BR')} ${fmtT(m.created_at)}${m.observacao?' · '+m.observacao:''}</div>
+            </div>
+            <span class="f800">${m.quantidade} ${p?p.unidade||'un':''}</span>
+          </div>`;
+        }).join('')
+      }
+    </div>`;
+}
+
+async function relLog(el, de, ate) {
+  const logs = (lsLog())
+    .filter(l => { const d = new Date(l.created_at); return d >= de && d <= ate; })
+    .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+  el.innerHTML = `<div class="card">
+    <div class="fs11 c-muted f800" style="margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">Log de atividades (${logs.length})</div>
+    ${!logs.length ? '<p class="fs12 c-muted tc">Nenhuma atividade no período</p>' :
+      logs.map(l => `<div class="li">
+        <div class="flex-1">
+          <div class="f700 fs12">${l.atividade}</div>
+          <div class="fs11 c-muted">${l.detalhes||''}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="fs11 f800">${l.usuario_nome||''}</div>
+          <div class="fs11 c-muted">${new Date(l.created_at).toLocaleDateString('pt-BR')} ${fmtT(l.created_at)}</div>
+        </div>
+      </div>`).join('')
+    }
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// VER / EDITAR COMANDA FINALIZADA
+// ══════════════════════════════════════════════
+async function mVerComanda(cid) {
+  const allComandas = await idbAll('comandas');
+  const c = allComandas.find(x => x.id === cid);
+  if (!c) return;
+  const mesa = getMesa(c.mesa_id);
+  const allItens = await idbAll('itens_comanda');
+  const itens = allItens.filter(i => i.comanda_id === cid).sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
+
+  const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+  const cvT = (c.couvert_valor||0)*(c.couvert_quantidade||0);
+  const jaPago = (c.pagamentos_parciais||[]).reduce((s,p)=>s+p.valor,0);
+  const total = sub + cvT - (c.desconto||0);
+  const nomeForma = {dinheiro:'💵 Dinheiro',cartao_credito:'💳 Crédito',cartao_debito:'💳 Débito',pix:'📱 Pix',dividido:'👥 Dividido'}[c.forma_pagamento]||c.forma_pagamento||'';
+
+  // Items — same style as open comanda
+  let itH = !itens.length ? '<p class="fs12 c-muted tc" style="padding:14px">Sem itens</p>' :
+    itens.map(i => {
+      const p = getProd(i.produto_id);
+      return '<div class="li">'
+        + '<div class="flex-1">'
+        + '<div class="f700">' + (i.quantidade!==1?i.quantidade+'x ':'') + (p?p.nome:'(removido)') + '</div>'
+        + '<div class="fs11 c-muted">' + fmtT(i.created_at) + (i.observacao?' · '+i.observacao:'') + '</div>'
+        + '</div>'
+        + '<div class="c-gold f800">' + fmtR(i.quantidade*i.preco_unitario) + '</div>'
+        + '<button class="btn btn-danger btn-sm btn-icon" data-iid="' + i.id + '" data-cid="' + cid + '" onclick="rmItemFinalizado(this.dataset.iid,this.dataset.cid)">✕</button>'
+        + '</div>';
+    }).join('');
+
+  // Partial payments
+  const parciaisH = (c.pagamentos_parciais||[]).length > 0
+    ? '<div class="card" style="margin:8px 0;padding:10px 12px"><div class="fs11 c-muted f800" style="margin-bottom:6px">PAGAMENTOS PARCIAIS</div>'
+      + (c.pagamentos_parciais||[]).map(p=>'<div class="tr" style="padding:3px 0"><span class="fs12 c-muted">'+fmtT(p.created_at)+' · '+p.obs+'</span><span class="c-green f800">'+fmtR(p.valor)+'</span></div>').join('')
+      + '</div>' : '';
+
+  showModal(
+    '<div class="flex aic jsb" style="margin-bottom:12px">'
+    + '<div>'
+    + '<div class="modal-title" style="margin-bottom:0">Mesa ' + (mesa?mesa.numero:'?') + (mesa&&mesa.nome?' — '+mesa.nome:'') + '</div>'
+    + (c.nome_cliente?'<div class="fs12" style="color:var(--text2);margin-top:2px">👤 '+c.nome_cliente+'</div>':'')
+    + '</div>'
+    + '<div style="text-align:right">'
+    + '<div class="fs11 c-muted">' + new Date(c.fechamento_at).toLocaleDateString('pt-BR') + ' ' + fmtT(c.fechamento_at) + '</div>'
+    + '<div class="fs11 c-muted">' + nomeForma + '</div>'
+    + '</div></div>'
+    + '<div class="card" style="margin-bottom:10px">' + itH + '</div>'
+    + (cvT>0?'<div class="tr"><span class="c-muted">Couvert ('+c.couvert_quantidade+'x)</span><span>'+fmtR(cvT)+'</span></div>':'')
+    + (c.desconto>0?'<div class="tr"><span class="c-muted">Desconto</span><span class="c-green">− '+fmtR(c.desconto)+'</span></div>':'')
+    + '<div class="tr big"><span>TOTAL</span><span>' + fmtR(total) + '</span></div>'
+    + (jaPago>0?'<div class="tr"><span style="color:var(--green)">✅ Já pago</span><span class="c-green f800">'+fmtR(jaPago)+'</span></div>':'')
+    + parciaisH
+    + '<div class="divider"></div>'
+    + '<div class="fg"><div class="lbl">Desconto (R$)</div>'
+    + '<input class="inp" id="editDesc" type="number" min="0" step="0.50" value="' + (c.desconto||0) + '"></div>'
+    + '<div class="lbl" style="margin-bottom:8px;margin-top:10px">Forma de pagamento</div>'
+    + '<div class="pay-grid">'
+    + ['dinheiro:💵 Dinheiro','cartao_credito:💳 Crédito','cartao_debito:💳 Débito','pix:📱 Pix'].map(x=>{
+        const [v,l] = x.split(':');
+        return '<button class="pay-btn' + (c.forma_pagamento===v?' sel':'') + '" data-v="' + v + '" onclick="selPay(this)">' + l + '</button>';
+      }).join('')
+    + '</div>'
+    + '<div class="flex gap8 mt12">'
+    + '<button class="btn btn-ghost flex-1" onclick="closeModal()">Fechar</button>'
+    + '<button class="btn btn-primary flex-1" onclick="doSalvarEdicaoComanda(\'' + cid + '\')">💾 Salvar edição</button>'
+    + '</div>'
+  );
+
+  document.getElementById('editDesc').oninput = e => {
+    const d = parseFloat(e.target.value)||0;
+    document.getElementById('editDesc').dataset.desc = d;
+  };
+}
+
+async function rmItemFinalizado(iid, cid) {
+  if (!await customConfirm('Remover este item da comanda?', 'Remover', true)) return;
+  const allItens = await idbAll('itens_comanda');
+  const item = allItens.find(i=>i.id===iid);
+  if (!item) return;
+  await idbDel('itens_comanda', iid);
+  if (S.online) { try { await sbDel('itens_comanda','id=eq.'+iid); } catch(e){} }
+  // Recalculate comanda total
+  const allComandas = await idbAll('comandas');
+  const c = allComandas.find(x=>x.id===cid);
+  if (c) {
+    const remaining = (await idbAll('itens_comanda')).filter(i=>i.comanda_id===cid);
+    const newSub = remaining.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+    const cvT = (c.couvert_valor||0)*(c.couvert_quantidade||0);
+    c.total = newSub + cvT - (c.desconto||0);
+    await idbPut('comandas', c);
+    if (S.online) { try { await sbPatch('comandas','id=eq.'+cid,{total:c.total}); } catch(e){} }
+  }
+  toast('Item removido');
+  mVerComanda(cid);
+}
+
+async function doSalvarEdicaoComanda(cid) {
+  const allComandas = await idbAll('comandas');
+  const c = allComandas.find(x=>x.id===cid);
+  if (!c) return;
+  const payBtn = document.querySelector('.pay-btn.sel');
+  const desc = parseFloat(document.getElementById('editDesc')?.value||0);
+  const allItens = await idbAll('itens_comanda');
+  const itens = allItens.filter(i=>i.comanda_id===cid);
+  const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+  const cvT = (c.couvert_valor||0)*(c.couvert_quantidade||0);
+  const novoTotal = sub + cvT - desc;
+
+  c.desconto = desc;
+  c.total = novoTotal;
+  if (payBtn) c.forma_pagamento = payBtn.dataset.v;
+  await idbPut('comandas', c);
+  if (S.online) {
+    try { await sbPatch('comandas','id=eq.'+cid,{desconto:desc,total:novoTotal,forma_pagamento:c.forma_pagamento}); } catch(e){}
+  }
+  await registrarLog('Edição comanda', 'Mesa '+(getMesa(c.mesa_id)?.numero||'?')+ ' editada: total '+fmtR(novoTotal));
+  closeModal();
+  toast('Comanda atualizada!');
+  go('caixa');
+}
+
+// ══════════════════════════════════════════════
+// PAGAMENTO PARCIAL
+// ══════════════════════════════════════════════
+function mPagamentoParcialFromFecha(mid) {
+  closeModal();
+  mPagamentoParcial(mid);
+}
+
+function mPagamentoParcial(mid) {
+  const mesa = getMesa(mid);
+  const c = getComanda(mid);
+  if (!c) return;
+  const itens = S.itens[c.id]||[];
+  const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+  const cvT = (c.couvert_valor||0)*(c.couvert_quantidade||0);
+  const totalComanda = sub + cvT - (c.desconto||0);
+  const jaPago = (c.pagamentos_parciais||[]).reduce((s,p)=>s+p.valor,0);
+  const restante = totalComanda - jaPago;
+
+  showModal('<div class="modal-title">💸 Pagamento Parcial</div>'
+    + '<div class="card" style="margin-bottom:12px">'
+    + '<div class="tr"><span class="c-muted">Total da comanda</span><span>' + fmtR(totalComanda) + '</span></div>'
+    + (jaPago > 0 ? '<div class="tr"><span class="c-muted">Já pago</span><span class="c-green">' + fmtR(jaPago) + '</span></div>' : '')
+    + '<div class="tr big"><span>Restante</span><span>' + fmtR(restante) + '</span></div>'
+    + '</div>'
+    + '<div class="fg"><div class="lbl">Valor a pagar agora</div>'
+    + '<input class="inp" id="ppValor" type="number" min="0" step="0.50" placeholder="' + restante.toFixed(2) + '"></div>'
+    + '<div class="lbl" style="margin-bottom:8px">Forma de pagamento</div>'
+    + '<div class="pay-grid">'
+    + '<button class="pay-btn" data-v="dinheiro" onclick="selPay(this)">💵 Dinheiro</button>'
+    + '<button class="pay-btn" data-v="cartao_credito" onclick="selPay(this)">💳 Crédito</button>'
+    + '<button class="pay-btn" data-v="cartao_debito" onclick="selPay(this)">💳 Débito</button>'
+    + '<button class="pay-btn" data-v="pix" onclick="selPay(this)">📱 Pix</button>'
+    + '</div>'
+    + '<div class="fg"><div class="lbl">Observação (quem está pagando)</div>'
+    + '<input class="inp" id="ppObs" placeholder="Ex: João, pessoa da direita..."></div>'
+    + '<div class="flex gap8 mt12">'
+    + '<button class="btn btn-ghost flex-1" onclick="mComanda(\'' + mid + '\')">← Voltar</button>'
+    + '<button class="btn btn-success flex-1" onclick="doPagamentoParcial(\'' + mid + '\')">✓ Registrar</button>'
+    + '</div>');
+}
+
+async function doPagamentoParcial(mid) {
+  const c = getComanda(mid);
+  if (!c) return;
+  const payBtn = document.querySelector('.pay-btn.sel');
+  if (!payBtn) { toast('Selecione a forma de pagamento'); return; }
+  const valor = parseFloat(document.getElementById('ppValor').value);
+  const obs = document.getElementById('ppObs').value||'pagamento parcial';
+  if (!valor || valor <= 0) { toast('Digite um valor'); return; }
+
+  // Register in comanda
+  if (!c.pagamentos_parciais) c.pagamentos_parciais = [];
+  const pagamento = { id: uid(), valor, forma: payBtn.dataset.v, obs, created_at: new Date().toISOString() };
+  c.pagamentos_parciais.push(pagamento);
+  await idbPut('comandas', c);
+  // pagamentos_parciais stored locally only (column may not exist in Supabase)
+
+  // Register in caixa
+  if (S.caixaSessao) {
+    const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor,
+      forma_pagamento:payBtn.dataset.v,
+      descricao:'Mesa ' + getMesa(mid).numero + ' — parcial: ' + obs,
+      comanda_id:c.id, created_at:new Date().toISOString() };
+    await idbPut('caixa_movimentacoes', mov);
+    if (S.online) { try { await sbPost('caixa_movimentacoes', mov); } catch(e){} }
+  }
+
+  await registrarLog('Pagamento parcial', 'Mesa ' + getMesa(mid).numero + ': ' + fmtR(valor) + ' — ' + obs);
+  toast('Pagamento de ' + fmtR(valor) + ' registrado!');
+  mComanda(mid);
+}
+
+// ══════════════════════════════════════════════
+// MODAL: BAIXA LIVRE (consumo/desperdício)
+// ══════════════════════════════════════════════
+function mBaixaLivre(tipo) {
+  const titulo = tipo === 'consumo_proprio' ? '🧉 Consumo Próprio' : '🗑️ Desperdício';
+  const selCat = S.catTab;
+  window._baixaTipo = tipo;
+
+  function tabsH() {
+    return '<div class="tabs">'
+      + `<span class="tab ${!selCat?'active':''}" onclick="filterBaixaCat(null,'${tipo}')">Todos</span>`
+      + S.categorias.map(c=>`<span class="tab ${selCat===c.id?'active':''}" onclick="filterBaixaCat('${c.id}','${tipo}')">${c.nome}</span>`).join('')
+      + '</div>';
+  }
+  function prodsH(cat) {
+    const list = cat ? S.produtos.filter(p=>p.categoria_id===cat) : S.produtos;
+    if (!list.length) return '<p class="fs12 c-muted tc" style="padding:20px">Nenhum produto</p>';
+    return list.map(p=>`
+      <div class="li">
+        <div class="flex-1">
+          <div class="f700">${p.nome}</div>
+          <div class="fs12 c-muted">${p.controla_estoque?`estq: ${p.quantidade_estoque} ${p.unidade||'un'}`:'sem controle de estoque'}</div>
+        </div>
+        <div class="qc">
+          <button class="qbtn" onclick="let i=document.getElementById('bq_${p.id}');i.value=Math.max(0,parseFloat(i.value||0)-1)">−</button>
+          <input id="bq_${p.id}" type="number" class="inp" value="0" min="0" step="0.5" style="width:48px;text-align:center;padding:6px 4px">
+          <button class="qbtn" onclick="let i=document.getElementById('bq_${p.id}');i.value=parseFloat(i.value||0)+1">+</button>
+        </div>
+      </div>`).join('');
+  }
+
+  showModal(`
+    <div class="modal-title">${titulo}</div>
+    <p class="fs12 c-muted" style="margin-bottom:12px">Selecione os produtos e quantidades. O estoque será debitado automaticamente.</p>
+    <div id="btabs">${tabsH()}</div>
+    <div id="bprods" class="card" style="margin-bottom:12px">${prodsH(selCat)}</div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost flex-1" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary flex-1" onclick="doConfirmarBaixa('${tipo}')">✓ Confirmar baixa</button>
+    </div>`);
+}
+
+window.filterBaixaCat = function(catId, tipo) {
+  S.catTab = catId;
+  const selCat = catId;
+  document.getElementById('btabs').innerHTML = '<div class="tabs">'
+    + `<span class="tab ${!catId?'active':''}" onclick="filterBaixaCat(null,'${tipo}')">Todos</span>`
+    + S.categorias.map(c=>`<span class="tab ${catId===c.id?'active':''}" onclick="filterBaixaCat('${c.id}','${tipo}')">${c.nome}</span>`).join('')
+    + '</div>';
+  const list = catId ? S.produtos.filter(p=>p.categoria_id===catId) : S.produtos;
+  document.getElementById('bprods').innerHTML = !list.length
+    ? '<p class="fs12 c-muted tc" style="padding:20px">Nenhum produto</p>'
+    : list.map(p=>`
+      <div class="li">
+        <div class="flex-1">
+          <div class="f700">${p.nome}</div>
+          <div class="fs12 c-muted">${p.controla_estoque?`estq: ${p.quantidade_estoque} ${p.unidade||'un'}`:'sem controle de estoque'}</div>
+        </div>
+        <div class="qc">
+          <button class="qbtn" onclick="let i=document.getElementById('bq_${p.id}');i.value=Math.max(0,parseFloat(i.value||0)-1)">−</button>
+          <input id="bq_${p.id}" type="number" class="inp" value="0" min="0" step="0.5" style="width:48px;text-align:center;padding:6px 4px">
+          <button class="qbtn" onclick="let i=document.getElementById('bq_${p.id}');i.value=parseFloat(i.value||0)+1">+</button>
+        </div>
+      </div>`).join('');
+};
+
+async function doConfirmarBaixa(tipo) {
+  const inputs = document.querySelectorAll('[id^="bq_"]');
+  const movs = [];
+  for (const input of inputs) {
+    const qtd = parseFloat(input.value)||0;
+    if (qtd <= 0) continue;
+    const pid = input.id.replace('bq_','');
+    const prod = getProd(pid);
+    if (!prod) continue;
+    const debito = qtd * (prod.fator_estoque||1);
+    prod.quantidade_estoque = Math.max(0,(prod.quantidade_estoque||0)-debito);
+    await idbPut('produtos', prod);
+    if (S.online) { try { await sbPatch('produtos',`id=eq.${pid}`,{quantidade_estoque:prod.quantidade_estoque}); }catch(e){} }
+    const mov = { id:uid(), produto_id:pid, tipo, quantidade:qtd, observacao:`${tipo==='consumo_proprio'?'Consumo próprio':'Desperdício'}: ${qtd} x ${prod.nome}`, created_at:new Date().toISOString() };
+    await idbPut('movimentacoes_estoque', mov);
+    movs.push(mov);
+    if (S.online) { try { await sbPost('movimentacoes_estoque', mov); }catch(e){} }
+  }
+  if (!movs.length) { toast('Nenhum produto selecionado'); return; }
+  await registrarLog(tipo==='consumo_proprio'?'Consumo próprio':'Desperdício', `${movs.length} produto(s) lançados`);
+  closeModal();
+  toast(`${movs.length} produto(s) baixado(s) do estoque`);
+  render();
+}
+
+// ══════════════════════════════════════════════
+// CUSTOM DIALOGS
+// ══════════════════════════════════════════════
+function customConfirm(msg, confirmLabel='Confirmar', danger=false) {
+  return new Promise(res => {
+    const div = document.createElement('div');
+    div.className = 'overlay';
+    div.style.zIndex = '500';
+    div.innerHTML = `<div class="modal" style="max-width:380px;border-radius:20px;margin:0 16px 40px">
+      <div style="font-size:22px;margin-bottom:12px;text-align:center">⚠️</div>
+      <p style="font-size:15px;font-weight:700;text-align:center;margin-bottom:20px;line-height:1.4">${msg}</p>
+      <div class="flex gap8">
+        <button class="btn btn-ghost flex-1" id="ccNo">Cancelar</button>
+        <button class="btn ${danger?'btn-danger':'btn-primary'} flex-1" id="ccYes">${confirmLabel}</button>
+      </div>
+    </div>`;
+    document.body.appendChild(div);
+    div.querySelector('#ccNo').onclick  = () => { div.remove(); res(false); };
+    div.querySelector('#ccYes').onclick = () => { div.remove(); res(true); };
+  });
+}
+
+function customAlert(msg, icon='ℹ️') {
+  return new Promise(res => {
+    const div = document.createElement('div');
+    div.className = 'overlay';
+    div.style.zIndex = '500';
+    div.innerHTML = `<div class="modal" style="max-width:380px;border-radius:20px;margin:0 16px 40px">
+      <div style="font-size:28px;margin-bottom:10px;text-align:center">${icon}</div>
+      <p style="font-size:14px;font-weight:700;text-align:center;margin-bottom:20px;line-height:1.4">${msg}</p>
+      <button class="btn btn-primary w-full" onclick="this.closest('.overlay').remove()">OK</button>
+    </div>`;
+    document.body.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════════
+// MODAL SYSTEM
+// ══════════════════════════════════════════════
+function showModal(html) {
+  document.getElementById('mc').innerHTML = `
+    <div class="overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">${html}</div>
+    </div>`;
+}
+function closeModal() { document.getElementById('mc').innerHTML=''; }
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+async function init() {
+  updateNet();
+  await idbInit();
+  await loadLocal();
+  if (S.online) await loadRemote();
+  // Sincroniza ao abrir — tenta novamente se a rede ainda não estiver pronta
+  if (S.online) {
+    await loadRemote();
+  } else {
+    // Rede não disponível ainda — tenta assim que conectar
+    const waitForNet = setInterval(async () => {
+      if (navigator.onLine) {
+        clearInterval(waitForNet);
+        await loadRemote();
+        render();
+        toast('Dados carregados do Supabase ✓');
+      }
+    }, 1500);
+    // Desiste após 30 segundos
+    setTimeout(() => clearInterval(waitForNet), 30000);
+  }
+  // LOGIN DESATIVADO (modo teste)
+  const _users = lsUsers();
+  S.currentUser = _users[0] || { id: 'temp', nome: 'Administrador', usuario: 'admin', perfil: 'admin' };
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('userBadge').style.display = 'flex';
+  document.getElementById('userNome').textContent = '👤 ' + S.currentUser.nome;
+  render();
+
+  // PWA Service Worker (inline blob)
+  if ('serviceWorker' in navigator) {
+    const sw = `
+const CACHE='choperia-v2';
+self.addEventListener('install',e=>e.waitUntil(
+  caches.open(CACHE).then(c=>c.addAll([]))
+));
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  e.respondWith(
+    caches.match(e.request).then(cached=>{
+      const net=fetch(e.request).then(res=>{
+        if(res.ok&&e.request.url.startsWith('https://fonts')){
+          const cl=res.clone(); caches.open(CACHE).then(c=>c.put(e.request,cl));
+        }
+        return res;
+      }).catch(()=>cached);
+      return cached||net;
+    })
+  );
+});`;
+    const blob = new Blob([sw],{type:'text/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+  }
+}
+
+init();
+</script>
+</body>
+</html>
