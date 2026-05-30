@@ -1191,7 +1191,7 @@ async function doSaveProd(id) {
   const nome = document.getElementById('pn')?.value?.trim(); 
   const cat = document.getElementById('pc')?.value;
   
-  // Limpeza forte de valores: troca vírgula por ponto, aceita número sem bugs
+  // Limpeza forte de valores: converte a vírgula para ponto e ignora erros de digitação
   const parseNum = val => parseFloat(String(val).replace(',','.')) || 0;
   
   const preco = parseNum(document.getElementById('pp')?.value); 
@@ -1208,7 +1208,7 @@ async function doSaveProd(id) {
   const promo_dias = Array.from(document.querySelectorAll('.p_dia:checked')).map(c=>c.value).join(',');
   const promo_data = document.getElementById('p_data')?.value||null;
 
-  if (!nome || !cat || preco === 0) { toast('Preencha nome, categoria e preço'); return; }
+  if (!nome || !cat || preco === 0) { toast('Preencha nome, categoria e o preço normal'); return; }
   
   const pData = { nome, categoria_id:cat, preco, unidade, controla_estoque:est, quantidade_estoque:qtd, estoque_minimo:min, fator_estoque:fator, ativo, preco_promo, promo_inicio, promo_fim, promo_dias, promo_data };
 
