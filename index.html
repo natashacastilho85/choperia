@@ -468,7 +468,7 @@ async function syncQueue() {
   for (const c of await idbAll('categorias')) await patchOrPost('categorias', c.id, {id:c.id,nome:c.nome,ordem:c.ordem});
 
   // ── PRODUTOS ──
-  const prodCols = ['id','nome','categoria_id','preco','unidade','controla_estoque','quantidade_estoque','estoque_minimo','fator_estoque','ativo','composicao','preco_promo','promo_inicio','promo_fim','is_insumo','created_at'];
+  const prodCols = ['id','nome','categoria_id','preco','unidade','controla_estoque','quantidade_estoque','estoque_minimo','fator_estoque','ativo','composicao','preco_promo','promo_inicio','promo_fim','promo_dias','promo_data','is_insumo','created_at'];
   for (const p of await idbAll('produtos')) {
     const d = Object.fromEntries(Object.entries(p).filter(([k])=>prodCols.includes(k)));
     await patchOrPost('produtos', p.id, d);
@@ -874,14 +874,22 @@ async function doAddItem(cid, pid) {
   const qtdInput = document.getElementById('q_'+pid);
   const qtd = qtdInput ? (parseFloat(qtdInput.value)||1) : 1;
   
-  // REGRA: HAPPY HOUR
+  // REGRA: HAPPY HOUR (HORA, DIA E DATA ESPECÍFICA)
   let precoFinal = prod.preco;
-  if (prod.preco_promo > 0 && prod.promo_inicio && prod.promo_fim) {
+  if (prod.preco_promo > 0) {
     const agora = new Date();
     const horaAtual = agora.getHours().toString().padStart(2,'0') + ':' + agora.getMinutes().toString().padStart(2,'0');
-    if (horaAtual >= prod.promo_inicio && horaAtual <= prod.promo_fim) {
+    const diaSemana = agora.getDay().toString(); // 0=Dom, 1=Seg...
+    const dataAtual = new Date(agora.getTime() - (agora.getTimezoneOffset() * 60000)).toISOString().slice(0,10);
+    
+    const dentroHorario = (!prod.promo_inicio || horaAtual >= prod.promo_inicio) && (!prod.promo_fim || horaAtual <= prod.promo_fim);
+    
+    // Prioriza data específica. Se não tiver, olha os dias da semana marcados.
+    const diaValido = prod.promo_data ? (prod.promo_data === dataAtual) : (prod.promo_dias && prod.promo_dias.includes(diaSemana));
+
+    if (dentroHorario && diaValido) {
       precoFinal = prod.preco_promo;
-      toast(`🍺 Preço de Happy Hour aplicado!`, 2000);
+      toast(`🍺 Promoção aplicada!`, 2000);
     }
   }
 
@@ -1100,6 +1108,9 @@ async function doDelCat(id) {
 }
 function prodForm(p) {
   const opts = S.categorias.map(c=>`<option value="${c.id}" ${p&&c.id===p.categoria_id?'selected':''}>${c.nome}</option>`).join('');
+  const diasPromo = p && p.promo_dias ? p.promo_dias.split(',') : ['0','1','2','3','4','5','6'];
+  const chkDia = (v, l) => `<label style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;cursor:pointer"><input type="checkbox" class="p_dia" value="${v}" ${diasPromo.includes(v)?'checked':''}> ${l}</label>`;
+  
   return `
     <div class="fg"><div class="lbl">Nome *</div><input class="inp" id="pn" value="${p?p.nome:''}" placeholder="Ex: Chope 300ml"></div>
     <div class="fg"><div class="lbl">Categoria *</div><select class="inp" id="pc"><option value="">Selecione...</option>${opts}</select></div>
@@ -1113,6 +1124,15 @@ function prodForm(p) {
         <div class="fg flex-1"><div class="lbl">Preço Promo (R$)</div><input class="inp" id="p_promo" type="number" step="0.50" min="0" value="${p?p.preco_promo||'':''}"></div>
         <div class="fg flex-1"><div class="lbl">Início (HH:MM)</div><input class="inp" id="p_ini" type="time" value="${p?p.promo_inicio||'':''}"></div>
         <div class="fg flex-1"><div class="lbl">Fim (HH:MM)</div><input class="inp" id="p_fim" type="time" value="${p?p.promo_fim||'':''}"></div>
+      </div>
+      <div class="fg mt8"><div class="lbl">Dias da semana (Promoção)</div>
+        <div class="flex gap10" style="flex-wrap:wrap; margin-top:4px">
+          ${chkDia('0','Dom')} ${chkDia('1','Seg')} ${chkDia('2','Ter')} ${chkDia('3','Qua')} ${chkDia('4','Qui')} ${chkDia('5','Sex')} ${chkDia('6','Sáb')}
+        </div>
+      </div>
+      <div class="fg mt8"><div class="lbl">Ou Data Específica (Eventos)</div>
+        <input class="inp" id="p_data" type="date" value="${p?p.promo_data||'':''}">
+        <div class="fs11 c-muted mt8">Se preencher uma data, os dias da semana são ignorados.</div>
       </div>
     </div>
     <div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700">
@@ -1150,18 +1170,25 @@ async function doSaveProd(id) {
   const est = document.getElementById('pe')?.checked; const qtd = parseFloat(document.getElementById('pq')?.value||0);
   const min = parseFloat(document.getElementById('pm')?.value||0); const fator = parseFloat(document.getElementById('pf')?.value||1);
   const ativo = id ? (document.getElementById('pativo')?.checked??true) : true;
+  
   const preco_promo = parseFloat(document.getElementById('p_promo')?.value||0);
   const promo_inicio = document.getElementById('p_ini')?.value||null;
   const promo_fim = document.getElementById('p_fim')?.value||null;
+  const promo_dias = Array.from(document.querySelectorAll('.p_dia:checked')).map(c=>c.value).join(',');
+  const promo_data = document.getElementById('p_data')?.value||null;
+
   if (!nome||!cat||isNaN(preco)) { toast('Preencha nome, categoria e preço'); return; }
+  
+  const pData = { nome, categoria_id:cat, preco, unidade, controla_estoque:est, quantidade_estoque:qtd, estoque_minimo:min, fator_estoque:fator, ativo, preco_promo, promo_inicio, promo_fim, promo_dias, promo_data };
+
   if (id) {
     const p = S.produtos.find(x=>x.id===id);
-    Object.assign(p, { nome, categoria_id:cat, preco, unidade, controla_estoque:est, quantidade_estoque:qtd, estoque_minimo:min, fator_estoque:fator, ativo, preco_promo, promo_inicio, promo_fim });
+    Object.assign(p, pData);
     await idbPut('produtos', p);
-    if (S.online) { try { await sbPatch('produtos',`id=eq.${id}`,{nome,categoria_id:cat,preco,unidade,controla_estoque:est,quantidade_estoque:qtd,estoque_minimo:min,fator_estoque:fator,ativo,preco_promo,promo_inicio,promo_fim}); }catch(e){} }
+    if (S.online) { try { await sbPatch('produtos',`id=eq.${id}`,pData); }catch(e){} }
     toast('Produto atualizado!');
   } else {
-    const p = { id:uid(), nome, categoria_id:cat, preco, unidade, controla_estoque:est, quantidade_estoque:qtd, estoque_minimo:min, fator_estoque:fator, ativo:true, preco_promo, promo_inicio, promo_fim, created_at:new Date().toISOString() };
+    const p = { id:uid(), ...pData, created_at:new Date().toISOString() };
     S.produtos.push(p); await idbPut('produtos', p);
     if (S.online) { try { await sbPost('produtos', p); }catch(e){} }
     toast(`"${nome}" criado!`);
