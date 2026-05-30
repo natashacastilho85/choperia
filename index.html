@@ -981,7 +981,7 @@ async function rmItemById(iid, mid) {
 }
 
 // ══════════════════════════════════════════════
-// MODAL: FECHAR MESA
+// MODAL: FECHAR MESA E DIVISÃO
 // ══════════════════════════════════════════════
 function mFecharMesa(mid) {
   const mesa = getMesa(mid); const c = getComanda(mid); if (!c) return;
@@ -991,27 +991,37 @@ function mFecharMesa(mid) {
   let sumH = grouped.map(i=>{const p=getProd(i.produto_id); return `<div class="tr"><span>${i.quantidade}x ${p?p.nome:'?'}</span><span>${fmtR(i.quantidade*i.preco_unitario)}</span></div>`}).join('');
   if (cvT>0) sumH += `<div class="tr"><span class="c-muted">Couvert (${c.couvert_quantidade}x)</span><span>${fmtR(cvT)}</span></div>`;
   sumH += `<div class="divider"></div><div class="tr"><span>Subtotal</span><span>${fmtR(sub+cvT)}</span></div>`;
+  
   const jaPago = (c.pagamentos_parciais||[]).reduce((s,p)=>s+p.valor,0);
   const totalBase = sub + cvT - (c.desconto||0);
   const restantePagar = Math.max(0, totalBase - jaPago);
+  
   showModal(`
     <div class="modal-title">Fechar Mesa ${mesa.numero}</div>
     ${jaPago>0?`<div class="tr" style="padding:4px 0"><span class="c-muted">Total da comanda</span><span>${fmtR(totalBase)}</span></div><div class="tr" style="padding:4px 0"><span style="color:var(--green)">✅ Já pago</span><span style="color:var(--green)">${fmtR(jaPago)}</span></div>`:''}
     <div class="card" style="margin-bottom:12px">${sumH||'<p class="fs12 c-muted tc">Nenhum item</p>'}</div>
-    <div class="fg"><div class="lbl">Desconto (R$)</div><input class="inp" id="fmdesc" type="number" min="0" step="0.50" value="${c.desconto||0}"></div>
-    <div class="tr big" style="margin-bottom:14px"><span>${jaPago>0?'A PAGAR':'TOTAL'}</span><span id="fmtotal">${fmtR(jaPago>0?restantePagar:totalBase)}</span></div>
+    <div class="fg"><div class="lbl">Desconto (R$)</div><input class="inp" id="fmdesc" type="number" min="0" step="0.50" onwheel="this.blur()" value="${c.desconto||0}"></div>
+    <div class="tr big" style="margin-bottom:14px"><span>${jaPago>0?'RESTA PAGAR':'TOTAL'}</span><span id="fmtotal">${fmtR(restantePagar)}</span></div>
+    
+    ${restantePagar > 0 ? `
     <div class="card" style="margin-bottom:14px">
       <div class="flex aic jsb" style="margin-bottom:10px"><span class="f800">Dividir a conta</span><div class="qc"><button class="qbtn" onclick="splitChange(-1)">−</button><input id="splitQty" type="number" class="inp" value="1" min="1" style="width:48px;text-align:center;padding:6px 4px" oninput="splitRender()"><button class="qbtn" onclick="splitChange(1)">+</button></div></div>
       <div id="splitInfo"></div>
     </div>
     <div id="splitPagamentos"><div class="lbl">Forma de pagamento</div><div class="pay-grid"><button class="pay-btn" data-v="dinheiro" onclick="selPay(this)">💵 Dinheiro</button><button class="pay-btn" data-v="cartao_credito" onclick="selPay(this)">💳 Crédito</button><button class="pay-btn" data-v="cartao_debito" onclick="selPay(this)">💳 Débito</button><button class="pay-btn" data-v="pix" onclick="selPay(this)">📱 Pix</button></div></div>
     <div class="divider"></div>
-    <button class="btn btn-ghost w-full" onclick="mPagamentoParcialFromFecha('${mid}')">💸 Pagamento parcial (alguém vai embora)</button>
-    <div class="flex gap8 mt12"><button class="btn btn-ghost flex-1" onclick="mComanda('${mid}')">← Voltar</button><button class="btn btn-success flex-1" onclick="doFechar('${mid}')">✓ Confirmar</button></div>
+    <button class="btn btn-ghost w-full" onclick="mPagamentoParcialFromFecha('${mid}')">💸 Pagamento parcial avulso</button>
+    ` : `<div class="alert alert-warn" style="background:#0d2e10;color:#70e070;border-color:#1c5a1e;text-align:center">Mesa totalmente paga! Clique em Confirmar para fechar.</div>`}
+    
+    <div class="flex gap8 mt12"><button class="btn btn-ghost flex-1" onclick="mComanda('${mid}')">← Voltar</button><button class="btn btn-success flex-1" onclick="doFechar('${mid}')">✓ Confirmar Fecho</button></div>
   `);
+  
   function calcTotal() { const bruto = sub + cvT - (parseFloat(document.getElementById('fmdesc')?.value)||0); return jaPago > 0 ? Math.max(0, bruto - jaPago) : bruto; }
+  
   window.splitRender = function() {
-    const n = parseInt(document.getElementById('splitQty')?.value)||1;
+    const elQty = document.getElementById('splitQty');
+    if (!elQty) return;
+    const n = parseInt(elQty.value)||1;
     const tot = calcTotal(); const pp = Math.round((tot/n)*100)/100;
     const info = document.getElementById('splitInfo'); const pags = document.getElementById('splitPagamentos');
     if (n <= 1) {
@@ -1021,62 +1031,104 @@ function mFecharMesa(mid) {
       if (info) info.innerHTML = '<div class="tr" style="padding:6px 0"><span class="c-muted fs12">Total a distribuir</span><span id="splitRestante" class="f800 c-gold">' + fmtR(tot) + '</span></div>';
       let pagsHtml = '<div class="lbl" style="margin-bottom:8px">Valor e pagamento por pessoa</div>';
       for (let i=0; i<n; i++) {
-        pagsHtml += '<div class="card" style="margin-bottom:8px;padding:10px 12px"><div class="flex aic jsb" style="margin-bottom:8px"><span class="f800">Pessoa ' + (i+1) + '</span><input type="number" class="inp split-val" data-p="' + i + '" value="' + pp.toFixed(2) + '" min="0" step="0.50" style="width:90px;text-align:right;padding:4px 8px" oninput="atualizarRestante(' + tot.toFixed(2) + ')"></div><div class="flex gap8"><button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="dinheiro" data-p="' + i + '" onclick="selPayPessoa(this)">💵</button><button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="cartao_credito" data-p="' + i + '" onclick="selPayPessoa(this)">💳 Cred</button><button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="cartao_debito" data-p="' + i + '" onclick="selPayPessoa(this)">💳 Déb</button><button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="pix" data-p="' + i + '" onclick="selPayPessoa(this)">📱</button></div></div>';
+        pagsHtml += '<div class="card" style="margin-bottom:8px;padding:10px 12px"><div class="flex aic jsb" style="margin-bottom:8px"><span class="f800">Pessoa ' + (i+1) + '</span><input type="number" class="inp split-val" data-p="' + i + '" value="' + pp.toFixed(2) + '" min="0" step="0.01" onwheel="this.blur()" style="width:90px;text-align:right;padding:4px 8px" oninput="atualizarRestante(' + tot.toFixed(2) + ')"></div><div class="flex aic jsb gap8"><div class="flex gap8"><button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="dinheiro" data-p="' + i + '" onclick="selPayPessoa(this)">💵</button><button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="cartao_credito" data-p="' + i + '" onclick="selPayPessoa(this)">💳 Cred</button><button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="cartao_debito" data-p="' + i + '" onclick="selPayPessoa(this)">💳 Déb</button><button class="pay-btn" style="padding:6px 8px;font-size:11px" data-v="pix" data-p="' + i + '" onclick="selPayPessoa(this)">📱</button></div><button class="btn btn-primary btn-sm" onclick="doPagamentoPessoaDivisao(' + i + ', \'' + mid + '\')">✓ Lançar</button></div></div>';
       }
       if (pags) pags.innerHTML = pagsHtml;
     }
   };
+  
   window.atualizarRestante = function(tot) {
-    const inputs = document.querySelectorAll('.split-val'); const usado = Array.from(inputs).reduce((s,i)=>s+(parseFloat(i.value)||0),0);
+    const inputs = document.querySelectorAll('.split-val'); const usado = Array.from(inputs).reduce((s,i)=>s+(parseFloat(String(i.value).replace(',','.'))||0),0);
     const resto = tot - usado; const el = document.getElementById('splitRestante');
     if (el) { el.textContent = fmtR(Math.abs(resto)); el.style.color = Math.abs(resto)<0.01?'var(--green)':resto<0?'var(--red)':'var(--gold)'; }
   };
-  window.splitChange = function(d) { const el = document.getElementById('splitQty'); el.value = Math.max(1,(parseInt(el.value)||1)+d); window.splitRender(); };
-  document.getElementById('fmdesc').oninput = e => { const d = parseFloat(e.target.value)||0; document.getElementById('fmtotal').textContent = fmtR(sub+cvT-d); window.splitRender(); };
+  
+  window.splitChange = function(d) { const el = document.getElementById('splitQty'); if(el){ el.value = Math.max(1,(parseInt(el.value)||1)+d); window.splitRender(); } };
+  const descEl = document.getElementById('fmdesc');
+  if(descEl) descEl.oninput = e => { const d = parseFloat(String(e.target.value).replace(',','.'))||0; const elTot = document.getElementById('fmtotal'); if(elTot) elTot.textContent = fmtR(sub+cvT-d); window.splitRender(); };
   window.splitRender();
 }
+
 window.selPay = btn => { document.querySelectorAll('.pay-btn:not([data-p])').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); };
 window.selPayPessoa = btn => { const p = btn.dataset.p; document.querySelectorAll(`.pay-btn[data-p="${p}"]`).forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); };
+
+window.doPagamentoPessoaDivisao = async function(idx, mid) {
+  const c = getComanda(mid); if (!c) return;
+  const payBtn = document.querySelector(`.pay-btn[data-p="${idx}"].sel`);
+  if (!payBtn) { toast(`Selecione a forma de pagamento da Pessoa ${idx+1}`); return; }
+  
+  const inputEl = document.querySelector(`.split-val[data-p="${idx}"]`);
+  const valor = parseFloat(String(inputEl.value).replace(',', '.'));
+  if (!valor || valor <= 0) { toast('Valor inválido'); return; }
+
+  const obs = `Pessoa ${idx+1} (Divisão)`;
+
+  if (!c.pagamentos_parciais) c.pagamentos_parciais = [];
+  const pagamento = { id: uid(), valor, forma: payBtn.dataset.v, obs, created_at: new Date().toISOString() };
+  c.pagamentos_parciais.push(pagamento);
+  await idbPut('comandas', c);
+
+  if (S.caixaSessao) {
+    const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor, forma_pagamento:payBtn.dataset.v, descricao:'Mesa ' + getMesa(mid).numero + ' — parcial: ' + obs, comanda_id:c.id, created_at:new Date().toISOString() };
+    await idbPut('caixa_movimentacoes', mov);
+    if (S.online) { try { await sbPost('caixa_movimentacoes', mov); } catch(e){} }
+  }
+
+  await registrarLog('Pagamento parcial', 'Mesa ' + getMesa(mid).numero + ': ' + fmtR(valor) + ' — ' + obs);
+  toast(`Pagamento de ${fmtR(valor)} da Pessoa ${idx+1} registado!`);
+  mFecharMesa(mid);
+};
+
 async function doFechar(mid) {
   const c = getComanda(mid); if (!c) return;
-  const n = parseInt(document.getElementById('splitQty')?.value)||1;
-  const desc = parseFloat(document.getElementById('fmdesc').value)||0;
+  const elQty = document.getElementById('splitQty');
+  const n = elQty ? (parseInt(elQty.value)||1) : 1;
+  const desc = parseFloat(String(document.getElementById('fmdesc')?.value||'0').replace(',','.'))||0;
   const itens = S.itens[c.id]||[];
   const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
   const cvT = (c.couvert_valor||0)*(c.couvert_quantidade||0);
   const total = sub+cvT-desc;
-  let forma;
-  if (n <= 1) {
-    const payBtn = document.querySelector('.pay-btn.sel');
-    if (!payBtn) { toast('Selecione a forma de pagamento'); return; }
-    forma = payBtn.dataset.v;
-  } else {
-    const sels = document.querySelectorAll('.pay-btn[data-p].sel');
-    if (sels.length < n) { toast(`Selecione o pagamento de todas as ${n} pessoas`); return; }
-    forma = 'dividido';
+  const jaPago = (c.pagamentos_parciais||[]).reduce((s,p)=>s+p.valor,0);
+  const restante = Math.max(0, total - jaPago);
+  
+  let forma = 'múltiplo';
+  
+  if (restante > 0) {
+    if (n <= 1) {
+      const payBtn = document.querySelector('.pay-btn.sel:not([data-p])');
+      if (!payBtn) { toast('Selecione a forma de pagamento'); return; }
+      forma = payBtn.dataset.v;
+    } else {
+      const sels = document.querySelectorAll('.pay-btn[data-p].sel');
+      if (sels.length < n) { toast(`Selecione o pagamento das ${n} pessoas`); return; }
+      forma = 'dividido';
+    }
   }
+
   Object.assign(c, { status:'fechada', fechamento_at:new Date().toISOString(), desconto:desc, total, forma_pagamento:forma });
   await idbPut('comandas', c);
   if (S.online) { try { await sbPatch('comandas','id=eq.'+c.id,{status:'fechada',fechamento_at:c.fechamento_at,desconto:desc,total,forma_pagamento:forma}); }catch(e){} }
-  if (S.caixaSessao) {
-    const n2 = parseInt(document.getElementById('splitQty')?.value)||1;
-    if (n2 > 1) {
+  
+  if (S.caixaSessao && restante > 0) {
+    if (n > 1) {
       const splitInputs = document.querySelectorAll('.split-val'); const sels = document.querySelectorAll('.pay-btn[data-p].sel');
       for (const btn of sels) {
-        const pIdx = parseInt(btn.dataset.p); const pVal = splitInputs[pIdx] ? (parseFloat(splitInputs[pIdx].value)||0) : (total/n2);
-        const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:pVal, forma_pagamento:btn.dataset.v, descricao:'Mesa ' + getMesa(mid).numero + ' (pessoa ' + (parseInt(btn.dataset.p)+1) + '/' + n2 + ')', comanda_id:c.id, created_at:new Date().toISOString() };
+        const pIdx = parseInt(btn.dataset.p); 
+        const valStr = splitInputs[pIdx] ? splitInputs[pIdx].value : (restante/n);
+        const pVal = parseFloat(String(valStr).replace(',', '.'));
+        const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:pVal, forma_pagamento:btn.dataset.v, descricao:'Mesa ' + getMesa(mid).numero + ' (pessoa ' + (parseInt(btn.dataset.p)+1) + '/' + n + ')', comanda_id:c.id, created_at:new Date().toISOString() };
         await idbPut('caixa_movimentacoes', mov);
         if (S.online) { try { await sbPost('caixa_movimentacoes', mov); }catch(e){} }
       }
     } else {
-      const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:total, forma_pagamento:forma, descricao:`Mesa ${getMesa(mid).numero}`, comanda_id:c.id, created_at:new Date().toISOString() };
+      const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:restante, forma_pagamento:forma, descricao:`Mesa ${getMesa(mid).numero}`, comanda_id:c.id, created_at:new Date().toISOString() };
       await idbPut('caixa_movimentacoes', mov);
       if (S.online) { try { await sbPost('caixa_movimentacoes', mov); }catch(e){} }
     }
   }
-  await registrarLog('Fechar mesa', `Mesa ${getMesa(mid).numero} — ${fmtR(total)} via ${forma}`);
+  await registrarLog('Fechar mesa', `Mesa ${getMesa(mid).numero} fechada`);
   S.comandas = S.comandas.filter(x=>x.id!==c.id); delete S.itens[c.id];
-  closeModal(); toast(`Mesa ${getMesa(mid).numero} fechada! ${fmtR(total)}`); render();
+  closeModal(); toast(`Mesa ${getMesa(mid).numero} fechada!`); render();
 }
 function mAddMesa() { go('config'); setTimeout(()=>toast('Use "+ Mesa" ou "+ Bistrô" em Configurações 👇'),200); }
 
