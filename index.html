@@ -756,14 +756,21 @@ async function doAbrirMesa(mid) {
   const obs = document.getElementById('mobs')?.value||'';
   const nome_cliente = document.getElementById('mnome_cli')?.value?.trim()||'';
   const comanda = { id: uid(), mesa_id: mid, abertura_at: new Date().toISOString(), status: 'aberta', couvert_valor: cv.ativo ? cv.valor : 0, couvert_quantidade: cvq, desconto: 0, total: null, observacao: obs, nome_cliente };
-  S.comandas.push(comanda); S.itens[comanda.id] = [];
+  
+  S.comandas.push(comanda); 
+  S.itens[comanda.id] = [];
   await idbPut('comandas', comanda);
+  
   if (S.online) {
     const safeCom = { id: comanda.id, mesa_id: comanda.mesa_id, abertura_at: comanda.abertura_at, status: comanda.status, couvert_valor: comanda.couvert_valor, couvert_quantidade: comanda.couvert_quantidade, desconto: comanda.desconto, total: comanda.total, observacao: comanda.observacao };
     try { await sbPost('comandas', {...safeCom, nome_cliente: comanda.nome_cliente}); } catch(e) { try { await sbPost('comandas', safeCom); } catch(e2){} }
   }
+  
   await registrarLog('Abrir mesa', `Mesa ${getMesa(mid).numero}${comanda.nome_cliente?' — '+comanda.nome_cliente:''}`);
-  closeModal(); toast(`Mesa ${getMesa(mid).numero} aberta!`); render();
+  closeModal(); 
+  toast(`Mesa ${getMesa(mid).numero} aberta!`); 
+  render();
+  mComanda(mid); // <-- Gatilho que puxa a tela da comanda
 }
 
 // ══════════════════════════════════════════════
@@ -872,19 +879,17 @@ async function doAddItem(cid, pid) {
   const prod = getProd(pid);
   if (!prod) return;
   const qtdInput = document.getElementById('q_'+pid);
-  const qtd = qtdInput ? (parseFloat(qtdInput.value)||1) : 1;
+  const qtd = qtdInput ? (parseFloat(String(qtdInput.value).replace(',','.'))||1) : 1;
   
-  // REGRA: HAPPY HOUR (HORA, DIA E DATA ESPECÍFICA)
+  // REGRA: HAPPY HOUR (Fuso horário local corrigido)
   let precoFinal = prod.preco;
   if (prod.preco_promo > 0) {
     const agora = new Date();
-    const horaAtual = agora.getHours().toString().padStart(2,'0') + ':' + agora.getMinutes().toString().padStart(2,'0');
-    const diaSemana = agora.getDay().toString(); // 0=Dom, 1=Seg...
-    const dataAtual = new Date(agora.getTime() - (agora.getTimezoneOffset() * 60000)).toISOString().slice(0,10);
+    const horaAtual = String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
+    const diaSemana = agora.getDay().toString();
+    const dataAtual = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,'0')}-${String(agora.getDate()).padStart(2,'0')}`;
     
     const dentroHorario = (!prod.promo_inicio || horaAtual >= prod.promo_inicio) && (!prod.promo_fim || horaAtual <= prod.promo_fim);
-    
-    // Prioriza data específica. Se não tiver, olha os dias da semana marcados.
     const diaValido = prod.promo_data ? (prod.promo_data === dataAtual) : (prod.promo_dias && prod.promo_dias.includes(diaSemana));
 
     if (dentroHorario && diaValido) {
@@ -898,7 +903,7 @@ async function doAddItem(cid, pid) {
   S.itens[cid].push(item);
   await idbPut('itens_comanda', item);
 
-  // REGRA: BAIXA DE ESTOQUE VIA FICHA TÉCNICA
+  // REGRA: BAIXA DE ESTOQUE (Matemática exata)
   let jsonComp = [];
   try { jsonComp = typeof prod.composicao === 'string' ? JSON.parse(prod.composicao) : (prod.composicao || []); } catch(e){}
 
@@ -907,14 +912,14 @@ async function doAddItem(cid, pid) {
       const insumo = getProd(comp.id);
       if (insumo && insumo.controla_estoque) {
         const debito = qtd * (comp.qtd || 1);
-        insumo.quantidade_estoque = Math.max(0, (insumo.quantidade_estoque||0) - debito);
+        insumo.quantidade_estoque = Math.max(0, Math.round(((insumo.quantidade_estoque||0) - debito) * 1000) / 1000);
         await idbPut('produtos', insumo);
         if (S.online) { try { await sbPatch('produtos', `id=eq.${insumo.id}`, {quantidade_estoque: insumo.quantidade_estoque}); }catch(e){} }
       }
     }
   } else if (prod.controla_estoque) {
     const debito = qtd * (prod.fator_estoque || 1);
-    prod.quantidade_estoque = Math.max(0, (prod.quantidade_estoque||0) - debito);
+    prod.quantidade_estoque = Math.max(0, Math.round(((prod.quantidade_estoque||0) - debito) * 1000) / 1000);
     await idbPut('produtos', prod);
     if (S.online) { try { await sbPatch('produtos',`id=eq.${pid}`,{quantidade_estoque:prod.quantidade_estoque}); }catch(e){} }
   }
@@ -947,13 +952,13 @@ async function rmItemById(iid, mid) {
       for (const comp of jsonComp) {
         const insumo = getProd(comp.id);
         if (insumo && insumo.controla_estoque) {
-          insumo.quantidade_estoque = (insumo.quantidade_estoque || 0) + (item.quantidade * (comp.qtd || 1));
+          insumo.quantidade_estoque = Math.round(((insumo.quantidade_estoque || 0) + (item.quantidade * (comp.qtd || 1))) * 1000) / 1000;
           await idbPut('produtos', insumo);
           if (S.online) { try { await sbPatch('produtos', 'id=eq.' + insumo.id, { quantidade_estoque: insumo.quantidade_estoque }); } catch(e){} }
         }
       }
     } else if (prod.controla_estoque) {
-      prod.quantidade_estoque = (prod.quantidade_estoque || 0) + (item.quantidade * (prod.fator_estoque || 1));
+      prod.quantidade_estoque = Math.round(((prod.quantidade_estoque || 0) + (item.quantidade * (prod.fator_estoque || 1))) * 1000) / 1000;
       await idbPut('produtos', prod);
       if (S.online) { try { await sbPatch('produtos', 'id=eq.' + prod.id, { quantidade_estoque: prod.quantidade_estoque }); } catch(e){} }
     }
@@ -1106,7 +1111,10 @@ async function doDelCat(id) {
   render(); // <-- Adicionado para atualizar o cardápio no fundo
   mCategorias();
 }
-function prodForm(p) {
+
+  
+  
+ function prodForm(p) {
   const opts = S.categorias.map(c=>`<option value="${c.id}" ${p&&c.id===p.categoria_id?'selected':''}>${c.nome}</option>`).join('');
   const diasPromo = p && p.promo_dias ? p.promo_dias.split(',') : ['0','1','2','3','4','5','6'];
   const chkDia = (v, l) => `<label style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;cursor:pointer"><input type="checkbox" class="p_dia" value="${v}" ${diasPromo.includes(v)?'checked':''}> ${l}</label>`;
@@ -1115,13 +1123,13 @@ function prodForm(p) {
     <div class="fg"><div class="lbl">Nome *</div><input class="inp" id="pn" value="${p?p.nome:''}" placeholder="Ex: Chope 300ml"></div>
     <div class="fg"><div class="lbl">Categoria *</div><select class="inp" id="pc"><option value="">Selecione...</option>${opts}</select></div>
     <div class="flex gap8">
-      <div class="fg flex-1"><div class="lbl">Preço Normal (R$) *</div><input class="inp" id="pp" type="number" step="0.50" min="0" value="${p?p.preco:''}"></div>
+      <div class="fg flex-1"><div class="lbl">Preço Normal (R$) *</div><input class="inp" id="pp" type="text" value="${p?p.preco:''}"></div>
       <div class="fg flex-1"><div class="lbl">Unidade</div><input class="inp" id="pu" value="${p?p.unidade||'un':'un'}"></div>
     </div>
     <div class="card" style="margin-bottom:12px; border-color: var(--gold-dk)">
       <div class="f800 c-gold fs12" style="margin-bottom:8px">⏱️ Happy Hour / Desconto Automático</div>
       <div class="flex gap8">
-        <div class="fg flex-1"><div class="lbl">Preço Promo (R$)</div><input class="inp" id="p_promo" type="number" step="0.50" min="0" value="${p?p.preco_promo||'':''}"></div>
+        <div class="fg flex-1"><div class="lbl">Preço Promo (R$)</div><input class="inp" id="p_promo" type="text" value="${p?p.preco_promo||'':''}"></div>
         <div class="fg flex-1"><div class="lbl">Início (HH:MM)</div><input class="inp" id="p_ini" type="time" value="${p?p.promo_inicio||'':''}"></div>
         <div class="fg flex-1"><div class="lbl">Fim (HH:MM)</div><input class="inp" id="p_fim" type="time" value="${p?p.promo_fim||'':''}"></div>
       </div>
@@ -1140,10 +1148,10 @@ function prodForm(p) {
     </label></div>
     <div id="ef" style="${p&&!p.controla_estoque?'display:none':''}">
       <div class="flex gap8">
-        <div class="fg flex-1"><div class="lbl">Qtd atual</div><input class="inp" id="pq" type="number" min="0" step="0.1" value="${p?p.quantidade_estoque:0}"></div>
-        <div class="fg flex-1"><div class="lbl">Mínimo</div><input class="inp" id="pm" type="number" min="0" step="0.1" value="${p?p.estoque_minimo:0}"></div>
+        <div class="fg flex-1"><div class="lbl">Qtd atual</div><input class="inp" id="pq" type="number" min="0" step="0.001" onwheel="this.blur()" value="${p?p.quantidade_estoque:0}"></div>
+        <div class="fg flex-1"><div class="lbl">Mínimo</div><input class="inp" id="pm" type="number" min="0" step="0.001" onwheel="this.blur()" value="${p?p.estoque_minimo:0}"></div>
       </div>
-      <div class="fg"><div class="lbl">Débito por venda</div><input class="inp" id="pf" type="number" min="0.001" step="0.001" value="${p?p.fator_estoque||1:1}"></div>
+      <div class="fg"><div class="lbl">Débito por venda</div><input class="inp" id="pf" type="number" min="0.001" step="0.001" onwheel="this.blur()" value="${p?p.fator_estoque||1:1}"></div>
     </div>
     <p class="fs11 c-muted mt8">Nota: Para usar Ficha Técnica (baixar ingredientes) configure na base de dados (coluna 'composicao').</p>
     ${p?`<div class="fg mt12"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700">
@@ -1165,19 +1173,27 @@ async function doDelProd(id) {
   closeModal(); toast(`"${p.nome}" excluído`); render();
 }
 async function doSaveProd(id) {
-  const nome = document.getElementById('pn')?.value?.trim(); const cat = document.getElementById('pc')?.value;
-  const preco = parseFloat(document.getElementById('pp')?.value); const unidade = document.getElementById('pu')?.value?.trim()||'un';
-  const est = document.getElementById('pe')?.checked; const qtd = parseFloat(document.getElementById('pq')?.value||0);
-  const min = parseFloat(document.getElementById('pm')?.value||0); const fator = parseFloat(document.getElementById('pf')?.value||1);
+  const nome = document.getElementById('pn')?.value?.trim(); 
+  const cat = document.getElementById('pc')?.value;
+  
+  // Limpeza forte de valores: troca vírgula por ponto, aceita número sem bugs
+  const parseNum = val => parseFloat(String(val).replace(',','.')) || 0;
+  
+  const preco = parseNum(document.getElementById('pp')?.value); 
+  const unidade = document.getElementById('pu')?.value?.trim()||'un';
+  const est = document.getElementById('pe')?.checked; 
+  const qtd = parseNum(document.getElementById('pq')?.value);
+  const min = parseNum(document.getElementById('pm')?.value); 
+  const fator = parseNum(document.getElementById('pf')?.value) || 1;
   const ativo = id ? (document.getElementById('pativo')?.checked??true) : true;
   
-  const preco_promo = parseFloat(document.getElementById('p_promo')?.value||0);
+  const preco_promo = parseNum(document.getElementById('p_promo')?.value);
   const promo_inicio = document.getElementById('p_ini')?.value||null;
   const promo_fim = document.getElementById('p_fim')?.value||null;
   const promo_dias = Array.from(document.querySelectorAll('.p_dia:checked')).map(c=>c.value).join(',');
   const promo_data = document.getElementById('p_data')?.value||null;
 
-  if (!nome||!cat||isNaN(preco)) { toast('Preencha nome, categoria e preço'); return; }
+  if (!nome || !cat || preco === 0) { toast('Preencha nome, categoria e preço'); return; }
   
   const pData = { nome, categoria_id:cat, preco, unidade, controla_estoque:est, quantidade_estoque:qtd, estoque_minimo:min, fator_estoque:fator, ativo, preco_promo, promo_inicio, promo_fim, promo_dias, promo_data };
 
