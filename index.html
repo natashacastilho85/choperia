@@ -983,7 +983,7 @@ async function rmItemById(iid, mid) {
 // ══════════════════════════════════════════════
 // MODAL: FECHAR MESA E DIVISÃO
 // ══════════════════════════════════════════════
-function mFecharMesa(mid) {
+function mFecharMesa(mid, defaultSplit = 1) {
   const mesa = getMesa(mid); const c = getComanda(mid); if (!c) return;
   const itens = S.itens[c.id]||[]; const grouped = groupItens(itens);
   const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
@@ -1005,7 +1005,7 @@ function mFecharMesa(mid) {
     
     ${restantePagar > 0 ? `
     <div class="card" style="margin-bottom:14px">
-      <div class="flex aic jsb" style="margin-bottom:10px"><span class="f800">Dividir a conta</span><div class="qc"><button class="qbtn" onclick="splitChange(-1)">−</button><input id="splitQty" type="number" class="inp" value="1" min="1" style="width:48px;text-align:center;padding:6px 4px" oninput="splitRender()"><button class="qbtn" onclick="splitChange(1)">+</button></div></div>
+      <div class="flex aic jsb" style="margin-bottom:10px"><span class="f800">Dividir a conta</span><div class="qc"><button class="qbtn" onclick="splitChange(-1)">−</button><input id="splitQty" type="number" class="inp" value="${defaultSplit}" min="1" style="width:48px;text-align:center;padding:6px 4px" oninput="splitRender()"><button class="qbtn" onclick="splitChange(1)">+</button></div></div>
       <div id="splitInfo"></div>
     </div>
     <div id="splitPagamentos"><div class="lbl">Forma de pagamento</div><div class="pay-grid"><button class="pay-btn" data-v="dinheiro" onclick="selPay(this)">💵 Dinheiro</button><button class="pay-btn" data-v="cartao_credito" onclick="selPay(this)">💳 Crédito</button><button class="pay-btn" data-v="cartao_debito" onclick="selPay(this)">💳 Débito</button><button class="pay-btn" data-v="pix" onclick="selPay(this)">📱 Pix</button></div></div>
@@ -1061,6 +1061,10 @@ window.doPagamentoPessoaDivisao = async function(idx, mid) {
   const valor = parseFloat(String(inputEl.value).replace(',', '.'));
   if (!valor || valor <= 0) { toast('Valor inválido'); return; }
 
+  // Descobre quantas pessoas estavam dividindo a conta antes desse pagamento
+  const currentSplitQty = parseInt(document.getElementById('splitQty')?.value) || 1;
+  const newSplitQty = Math.max(1, currentSplitQty - 1);
+
   const obs = `Pessoa ${idx+1} (Divisão)`;
 
   if (!c.pagamentos_parciais) c.pagamentos_parciais = [];
@@ -1075,8 +1079,10 @@ window.doPagamentoPessoaDivisao = async function(idx, mid) {
   }
 
   await registrarLog('Pagamento parcial', 'Mesa ' + getMesa(mid).numero + ': ' + fmtR(valor) + ' — ' + obs);
-  toast(`Pagamento de ${fmtR(valor)} da Pessoa ${idx+1} registado!`);
-  mFecharMesa(mid);
+  toast(`Pagamento de ${fmtR(valor)} registado!`);
+  
+  // Reabre a tela já diminuindo 1 pessoa da divisão e recalculando o valor restante
+  mFecharMesa(mid, newSplitQty);
 };
 
 async function doFechar(mid) {
