@@ -1086,13 +1086,17 @@ async function doNewCat() {
   const nome = document.getElementById('ncnome')?.value?.trim(); if (!nome) { toast('Digite um nome'); return; }
   const cat = { id:uid(), nome, ordem:S.categorias.length }; S.categorias.push(cat); await idbPut('categorias', cat);
   if (S.online) { try { await sbPost('categorias', cat); }catch(e){} }
-  toast(`"${nome}" criada!`); mCategorias();
+  toast(`"${nome}" criada!`); 
+  render(); // <-- Adicionado para atualizar o cardápio no fundo
+  mCategorias();
 }
 async function doDelCat(id) {
   if (S.produtos.some(p=>p.categoria_id===id)) { toast('Mova os produtos desta categoria primeiro'); return; }
   S.categorias = S.categorias.filter(c=>c.id!==id); await idbDel('categorias', id);
   if (S.online) { try { await sbDel('categorias',`id=eq.${id}`); }catch(e){} }
-  toast('Removida'); mCategorias();
+  toast('Removida'); 
+  render(); // <-- Adicionado para atualizar o cardápio no fundo
+  mCategorias();
 }
 function prodForm(p) {
   const opts = S.categorias.map(c=>`<option value="${c.id}" ${p&&c.id===p.categoria_id?'selected':''}>${c.nome}</option>`).join('');
