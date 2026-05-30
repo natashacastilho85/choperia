@@ -799,7 +799,13 @@ function mComanda(mid) {
 
   showModal(`
     <div class="flex aic jsb" style="margin-bottom:12px">
-      <div><div class="modal-title" style="margin-bottom:0">Mesa ${mesa.numero}${mesa.nome?' — '+mesa.nome:''}</div>${c.nome_cliente?`<div class="fs12" style="color:var(--text2);margin-top:2px">👤 ${c.nome_cliente}</div>`:''}</div>
+      <div>
+        <div class="flex aic gap8">
+          <div class="modal-title" style="margin-bottom:0">Mesa ${mesa.numero}${mesa.nome?' — '+mesa.nome:''}</div>
+          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11px" onclick="mTransferir('${mid}')">🔀 Juntar/Mudar</button>
+        </div>
+        ${c.nome_cliente?`<div class="fs12" style="color:var(--text2);margin-top:2px">👤 ${c.nome_cliente}</div>`:''}
+      </div>
       <span class="fs11 c-muted">${elapsed(c.abertura_at)}</span>
     </div>
     <div class="card" style="margin-bottom:10px">${itH}</div>
@@ -817,6 +823,107 @@ function mComanda(mid) {
       <button class="btn btn-success flex-1" onclick="mFecharMesa('${mid}')">💳 Fechar Mesa</button>
     </div>
   `);
+}
+
+// ══════════════════════════════════════════════
+// JUNTAR / TRANSFERIR MESA
+// ══════════════════════════════════════════════
+function mTransferir(mid) {
+  const mesaAtual = getMesa(mid);
+  if (!mesaAtual) return;
+
+  let html = `<div class="modal-title">🔀 Juntar ou Mudar Mesa</div>
+    <p class="fs12 c-muted" style="margin-bottom:14px">Para qual mesa deseja mover a <strong>Mesa ${mesaAtual.numero}</strong>?</p>
+    <div class="card" style="max-height: 50vh; overflow-y: auto;">`;
+
+  const outrasMesas = S.mesas.filter(m => m.id !== mid);
+  if(outrasMesas.length === 0) {
+      html += `<p class="fs12 c-muted tc">Nenhuma outra mesa disponível</p>`;
+  } else {
+      outrasMesas.forEach(m => {
+         const cDest = getComanda(m.id);
+         const ocupada = !!cDest;
+         const badge = ocupada ? `<span class="badge badge-y">Ocupada (Juntar)</span>` : `<span class="badge badge-g">Livre (Mudar)</span>`;
+         html += `<div class="li" style="cursor:pointer" onclick="doTransferir('${mid}', '${m.id}')">
+            <div class="flex-1">
+              <div class="f800">Mesa ${m.numero} ${m.nome ? '— '+m.nome : ''}</div>
+            </div>
+            ${badge}
+         </div>`;
+      });
+  }
+  html += `</div>
+    <div class="mt12"><button class="btn btn-ghost w-full" onclick="mComanda('${mid}')">← Voltar</button></div>`;
+  showModal(html);
+}
+
+async function doTransferir(midOrigem, midDestino) {
+  const mOrigem = getMesa(midOrigem);
+  const mDestino = getMesa(midDestino);
+  const cOrigem = getComanda(midOrigem);
+  const cDestino = getComanda(midDestino);
+
+  if (!cOrigem) return;
+
+  if (!cDestino) {
+    // TRANSFERIR (A mesa de destino está livre)
+    if (!await customConfirm(`Mudar a comanda da Mesa ${mOrigem.numero} para a Mesa ${mDestino.numero} (Livre)?`, 'Sim, mudar')) return;
+    
+    cOrigem.mesa_id = midDestino;
+    await idbPut('comandas', cOrigem);
+    if (S.online) { try { await sbPatch('comandas', `id=eq.${cOrigem.id}`, { mesa_id: midDestino }); } catch(e){} }
+    
+    await registrarLog('Transferir Mesa', `Moveu da ${mOrigem.numero} para ${mDestino.numero}`);
+    closeModal(); toast(`Mesa alterada para ${mDestino.numero}`); render(); mComanda(midDestino);
+  } else {
+    // JUNTAR (A mesa de destino está ocupada)
+    if (!await customConfirm(`JUNTAR a Mesa ${mOrigem.numero} com a Mesa ${mDestino.numero}?\n\nTodos os itens e pagamentos serão passados para a Mesa ${mDestino.numero} e a Mesa ${mOrigem.numero} ficará livre.`, 'Sim, juntar')) return;
+
+    // 1. Move os itens para a comanda de destino
+    const itensOrigem = S.itens[cOrigem.id] || [];
+    for (const i of itensOrigem) {
+       i.comanda_id = cDestino.id;
+       await idbPut('itens_comanda', i);
+       if (S.online) { try { await sbPatch('itens_comanda', `id=eq.${i.id}`, { comanda_id: cDestino.id }); } catch(e){} }
+    }
+    
+    if (!S.itens[cDestino.id]) S.itens[cDestino.id] = [];
+    S.itens[cDestino.id].push(...itensOrigem);
+    
+    // 2. Soma o couvert e os pagamentos já feitos
+    cDestino.couvert_quantidade = (cDestino.couvert_quantidade || 0) + (cOrigem.couvert_quantidade || 0);
+    
+    if (cOrigem.pagamentos_parciais && cOrigem.pagamentos_parciais.length > 0) {
+        if (!cDestino.pagamentos_parciais) cDestino.pagamentos_parciais = [];
+        cDestino.pagamentos_parciais.push(...cOrigem.pagamentos_parciais);
+    }
+
+    cDestino.observacao = ((cDestino.observacao || '') + ` (Juntou com Mesa ${mOrigem.numero})`).trim();
+
+    await idbPut('comandas', cDestino);
+    if (S.online) { 
+        try { await sbPatch('comandas', `id=eq.${cDestino.id}`, { couvert_quantidade: cDestino.couvert_quantidade, observacao: cDestino.observacao }); } catch(e){} 
+    }
+
+    // 3. Atualiza os pagamentos no caixa (se houver) para a nova mesa
+    const movs = await idbAll('caixa_movimentacoes');
+    for (const m of movs) {
+       if (m.comanda_id === cOrigem.id) {
+           m.comanda_id = cDestino.id;
+           await idbPut('caixa_movimentacoes', m);
+           if (S.online) { try { await sbPatch('caixa_movimentacoes', `id=eq.${m.id}`, { comanda_id: cDestino.id }); } catch(e){} }
+       }
+    }
+
+    // 4. Apaga a comanda de origem, libertando a mesa
+    S.comandas = S.comandas.filter(c => c.id !== cOrigem.id);
+    delete S.itens[cOrigem.id];
+    await idbDel('comandas', cOrigem.id);
+    if (S.online) { try { await sbDel('comandas', `id=eq.${cOrigem.id}`); } catch(e){} }
+
+    await registrarLog('Juntar Mesas', `Juntou Mesa ${mOrigem.numero} na Mesa ${mDestino.numero}`);
+    closeModal(); toast(`Mesas juntas com sucesso!`); render(); mComanda(midDestino);
+  }
 }
 
 // ══════════════════════════════════════════════
