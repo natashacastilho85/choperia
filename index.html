@@ -881,7 +881,7 @@ async function doAddItem(cid, pid) {
   const qtdInput = document.getElementById('q_'+pid);
   const qtd = qtdInput ? (parseFloat(String(qtdInput.value).replace(',','.'))||1) : 1;
   
-  // REGRA: HAPPY HOUR (Fuso horário local corrigido)
+  // REGRA: HAPPY HOUR BLINDADA (Hora, Madrugada e Data)
   let precoFinal = prod.preco;
   if (prod.preco_promo > 0) {
     const agora = new Date();
@@ -889,7 +889,22 @@ async function doAddItem(cid, pid) {
     const diaSemana = agora.getDay().toString();
     const dataAtual = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,'0')}-${String(agora.getDate()).padStart(2,'0')}`;
     
-    const dentroHorario = (!prod.promo_inicio || horaAtual >= prod.promo_inicio) && (!prod.promo_fim || horaAtual <= prod.promo_fim);
+    let dentroHorario = true;
+    if (prod.promo_inicio && prod.promo_fim) {
+      if (prod.promo_inicio <= prod.promo_fim) {
+        // Horário normal (ex: 18:00 às 22:00)
+        dentroHorario = horaAtual >= prod.promo_inicio && horaAtual <= prod.promo_fim;
+      } else {
+        // Vira a madrugada (ex: 20:00 às 02:00)
+        dentroHorario = horaAtual >= prod.promo_inicio || horaAtual <= prod.promo_fim;
+      }
+    } else if (prod.promo_inicio) {
+      dentroHorario = horaAtual >= prod.promo_inicio;
+    } else if (prod.promo_fim) {
+      dentroHorario = horaAtual <= prod.promo_fim;
+    }
+
+    // A data específica manda mais que o dia da semana
     const diaValido = prod.promo_data ? (prod.promo_data === dataAtual) : (prod.promo_dias && prod.promo_dias.includes(diaSemana));
 
     if (dentroHorario && diaValido) {
@@ -903,7 +918,7 @@ async function doAddItem(cid, pid) {
   S.itens[cid].push(item);
   await idbPut('itens_comanda', item);
 
-  // REGRA: BAIXA DE ESTOQUE (Matemática exata)
+  // REGRA: BAIXA DE ESTOQUE VIA FICHA TÉCNICA (Com precisão matemática)
   let jsonComp = [];
   try { jsonComp = typeof prod.composicao === 'string' ? JSON.parse(prod.composicao) : (prod.composicao || []); } catch(e){}
 
