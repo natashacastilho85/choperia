@@ -700,7 +700,16 @@ function mesaCard(mesa) {
   const jaPagoCard = ocu ? (c.pagamentos_parciais||[]).reduce((s,p)=>s+p.valor,0) : 0;
   const total = totalBruto - jaPagoCard;
   const hasCv = ocu && (c.couvert_valor||0) > 0;
-  let inner = '';
+  
+  // Aplica as cores de grupo (se existirem)
+  let styleStr = '';
+  let linkIcon = '';
+  if (ocu && S._coresGrupo && S._coresGrupo[mesa.id]) {
+     styleStr = `style="background:${S._coresGrupo[mesa.id].bg}; border-color:${S._coresGrupo[mesa.id].bd}"`;
+     linkIcon = '<div style="position:absolute;top:8px;left:8px;font-size:12px;opacity:0.8" title="Mesas Unidas">🔗</div>';
+  }
+
+  let inner = linkIcon;
   if (hasCv) inner += '<div class="couvert-pip">COUVERT</div>';
   inner += '<div class="mesa-num">' + mesa.numero + '</div>';
   if (mesa.nome) inner += '<div class="mesa-label">' + mesa.nome + '</div>';
@@ -710,9 +719,33 @@ function mesaCard(mesa) {
     inner += '<div class="mesa-extra">' + elapsed(c.abertura_at) + '</div>';
     inner += '<div class="mesa-total">' + fmtR(total) + '</div>';
   } else { inner += '<div class="mesa-label" style="color:var(--text3)">livre</div>'; }
-  return '<div class="mesa-card ' + (ocu ? 'ocupada' : '') + '" data-mid="' + mesa.id + '">' + inner + '</div>';
+  return `<div class="mesa-card ${ocu ? 'ocupada' : ''}" data-mid="${mesa.id}" ${styleStr}>${inner}</div>`;
 }
+
 function pgMesas() {
+  // NOVA LÓGICA: Descobrir e pintar grupos de mesas unidas
+  S._coresGrupo = {};
+  let arrGrupos = [];
+  S.mesas.forEach(m => {
+    const lbl = m.categoria === 'Bistro' ? 'Bistrô' : 'Mesa';
+    const tag = `(Mesa vinculada ao ${lbl} ${m.numero})`;
+    const fantasmas = S.comandas.filter(c => c.status === 'aberta' && c.observacao && c.observacao.includes(tag));
+    if (fantasmas.length > 0 && getComanda(m.id)) {
+      arrGrupos.push([m.id, ...fantasmas.map(f => f.mesa_id)]);
+    }
+  });
+  
+  // Paleta de cores para os grupos (Fundo escuro, Borda brilhante)
+  const bgColors = ['#0f293e', '#3e1525', '#1e3824', '#3d1e3d', '#3d2512'];
+  const bdColors = ['#4090e0', '#e04070', '#50c878', '#c850c8', '#e07040'];
+  
+  arrGrupos.forEach((g, i) => {
+    const bg = bgColors[i % bgColors.length];
+    const bd = bdColors[i % bdColors.length];
+    g.forEach(mid => S._coresGrupo[mid] = { bg, bd });
+  });
+
+  // Geração normal da página
   const baixos = S.produtos.filter(p => p.controla_estoque && p.estoque_minimo > 0 && p.quantidade_estoque <= p.estoque_minimo);
   let h = '';
   if (baixos.length) h += '<div class="alert alert-warn">⚠️ Estoque baixo: ' + baixos.map(p => p.nome + ' (' + p.quantidade_estoque + '/' + p.estoque_minimo + ' ' + (p.unidade||'un') + ')').join(' · ') + '</div>';
