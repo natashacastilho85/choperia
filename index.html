@@ -1081,6 +1081,79 @@ async function doFechar(mid) {
 function mAddMesa() { go('config'); setTimeout(()=>toast('Use "+ Mesa" ou "+ Bistrô" em Configurações 👇'),200); }
 
 // ══════════════════════════════════════════════
+// PAGAMENTO PARCIAL
+// ══════════════════════════════════════════════
+function mPagamentoParcialFromFecha(mid) {
+  closeModal();
+  mPagamentoParcial(mid);
+}
+
+function mPagamentoParcial(mid) {
+  const mesa = getMesa(mid);
+  const c = getComanda(mid);
+  if (!c) return;
+  const itens = S.itens[c.id]||[];
+  const sub = itens.reduce((s,i)=>s+(i.quantidade*i.preco_unitario),0);
+  const cvT = (c.couvert_valor||0)*(c.couvert_quantidade||0);
+  const totalComanda = sub + cvT - (c.desconto||0);
+  const jaPago = (c.pagamentos_parciais||[]).reduce((s,p)=>s+p.valor,0);
+  const restante = totalComanda - jaPago;
+
+  showModal('<div class="modal-title">💸 Pagamento Parcial</div>'
+    + '<div class="card" style="margin-bottom:12px">'
+    + '<div class="tr"><span class="c-muted">Total da comanda</span><span>' + fmtR(totalComanda) + '</span></div>'
+    + (jaPago > 0 ? '<div class="tr"><span class="c-muted">Já pago</span><span class="c-green">' + fmtR(jaPago) + '</span></div>' : '')
+    + '<div class="tr big"><span>Restante</span><span>' + fmtR(restante) + '</span></div>'
+    + '</div>'
+    + '<div class="fg"><div class="lbl">Valor a pagar agora</div>'
+    + '<input class="inp" id="ppValor" type="text" placeholder="' + restante.toFixed(2) + '"></div>'
+    + '<div class="lbl" style="margin-bottom:8px">Forma de pagamento</div>'
+    + '<div class="pay-grid">'
+    + '<button class="pay-btn" data-v="dinheiro" onclick="selPay(this)">💵 Dinheiro</button>'
+    + '<button class="pay-btn" data-v="cartao_credito" onclick="selPay(this)">💳 Crédito</button>'
+    + '<button class="pay-btn" data-v="cartao_debito" onclick="selPay(this)">💳 Débito</button>'
+    + '<button class="pay-btn" data-v="pix" onclick="selPay(this)">📱 Pix</button>'
+    + '</div>'
+    + '<div class="fg"><div class="lbl">Observação (quem está a pagar)</div>'
+    + '<input class="inp" id="ppObs" placeholder="Ex: João, pessoa da direita..."></div>'
+    + '<div class="flex gap8 mt12">'
+    + '<button class="btn btn-ghost flex-1" onclick="mComanda(\'' + mid + '\')">← Voltar</button>'
+    + '<button class="btn btn-success flex-1" onclick="doPagamentoParcial(\'' + mid + '\')">✓ Registar</button>'
+    + '</div>');
+}
+
+async function doPagamentoParcial(mid) {
+  const c = getComanda(mid);
+  if (!c) return;
+  const payBtn = document.querySelector('.pay-btn.sel');
+  if (!payBtn) { toast('Selecione a forma de pagamento'); return; }
+  
+  const valorStr = document.getElementById('ppValor').value;
+  const valor = parseFloat(String(valorStr).replace(',', '.'));
+  const obs = document.getElementById('ppObs').value||'pagamento parcial';
+  
+  if (!valor || valor <= 0) { toast('Digite um valor válido'); return; }
+
+  if (!c.pagamentos_parciais) c.pagamentos_parciais = [];
+  const pagamento = { id: uid(), valor, forma: payBtn.dataset.v, obs, created_at: new Date().toISOString() };
+  c.pagamentos_parciais.push(pagamento);
+  await idbPut('comandas', c);
+
+  if (S.caixaSessao) {
+    const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor,
+      forma_pagamento:payBtn.dataset.v,
+      descricao:'Mesa ' + getMesa(mid).numero + ' — parcial: ' + obs,
+      comanda_id:c.id, created_at:new Date().toISOString() };
+    await idbPut('caixa_movimentacoes', mov);
+    if (S.online) { try { await sbPost('caixa_movimentacoes', mov); } catch(e){} }
+  }
+
+  await registrarLog('Pagamento parcial', 'Mesa ' + getMesa(mid).numero + ': ' + fmtR(valor) + ' — ' + obs);
+  toast('Pagamento de ' + fmtR(valor) + ' registado!');
+  mComanda(mid);
+}
+  
+// ══════════════════════════════════════════════
 // PAGE: CARDÁPIO E PRODUTOS (COM HAPPY HOUR)
 // ══════════════════════════════════════════════
 function pgCardapio() {
