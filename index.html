@@ -832,21 +832,24 @@ function mTransferir(mid) {
   const mesaAtual = getMesa(mid);
   if (!mesaAtual) return;
 
-  let html = `<div class="modal-title">🔀 Juntar ou Mudar Mesa</div>
-    <p class="fs12 c-muted" style="margin-bottom:14px">Para qual mesa deseja mover a <strong>Mesa ${mesaAtual.numero}</strong>?</p>
+  const lblAtual = mesaAtual.categoria === 'Bistro' ? 'Bistrô' : 'Mesa';
+
+  let html = `<div class="modal-title">🔀 Juntar ou Mudar</div>
+    <p class="fs12 c-muted" style="margin-bottom:14px">Para onde deseja mover ou juntar o(a) <strong>${lblAtual} ${mesaAtual.numero}</strong>?</p>
     <div class="card" style="max-height: 50vh; overflow-y: auto;">`;
 
   const outrasMesas = S.mesas.filter(m => m.id !== mid);
   if(outrasMesas.length === 0) {
-      html += `<p class="fs12 c-muted tc">Nenhuma outra mesa disponível</p>`;
+      html += `<p class="fs12 c-muted tc">Nenhuma outra opção disponível</p>`;
   } else {
       outrasMesas.forEach(m => {
          const cDest = getComanda(m.id);
          const ocupada = !!cDest;
-         const badge = ocupada ? `<span class="badge badge-y">Ocupada (Juntar)</span>` : `<span class="badge badge-g">Livre (Mudar)</span>`;
+         const badge = ocupada ? `<span class="badge badge-y">Ocupada (Juntar)</span>` : `<span class="badge badge-g">Livre (Mudar/Juntar)</span>`;
+         const lblDest = m.categoria === 'Bistro' ? 'Bistrô' : 'Mesa';
          html += `<div class="li" style="cursor:pointer" onclick="doTransferir('${mid}', '${m.id}')">
             <div class="flex-1">
-              <div class="f800">Mesa ${m.numero} ${m.nome ? '— '+m.nome : ''}</div>
+              <div class="f800">${lblDest} ${m.numero} ${m.nome ? '— '+m.nome : ''}</div>
             </div>
             ${badge}
          </div>`;
@@ -865,19 +868,23 @@ async function doTransferir(midOrigem, midDestino) {
 
   if (!cOrigem) return;
 
+  const lblOrigem = mOrigem.categoria === 'Bistro' ? 'Bistrô' : 'Mesa';
+  const lblDestino = mDestino.categoria === 'Bistro' ? 'Bistrô' : 'Mesa';
+
   if (!cDestino) {
-    // TRANSFERIR (A mesa de destino está livre)
-    if (!await customConfirm(`Mudar a comanda da Mesa ${mOrigem.numero} para a Mesa ${mDestino.numero} (Livre)?`, 'Sim, mudar')) return;
-    
-    cOrigem.mesa_id = midDestino;
-    await idbPut('comandas', cOrigem);
-    if (S.online) { try { await sbPatch('comandas', `id=eq.${cOrigem.id}`, { mesa_id: midDestino }); } catch(e){} }
-    
-    await registrarLog('Transferir Mesa', `Moveu da ${mOrigem.numero} para ${mDestino.numero}`);
-    closeModal(); toast(`Mesa alterada para ${mDestino.numero}`); render(); mComanda(midDestino);
+    // A MESA DE DESTINO ESTÁ LIVRE: PERGUNTA O QUE FAZER
+    showModal(`
+        <div class="modal-title">Opções para ${lblDestino} ${mDestino.numero}</div>
+        <p class="fs12 c-muted" style="margin-bottom:14px">O que deseja fazer com esta mesa livre?</p>
+        <div class="flex gap8" style="flex-direction:column">
+           <button class="btn btn-primary w-full" style="padding:14px;font-size:15px" onclick="execMudar('${midOrigem}', '${midDestino}')">➡️ MUDAR a comanda para cá</button>
+           <button class="btn btn-success w-full" style="padding:14px;font-size:15px;background:#123d14" onclick="execJuntarFantasma('${midOrigem}', '${midDestino}')">🔀 JUNTAR com a minha mesa atual</button>
+           <button class="btn btn-ghost w-full mt8" onclick="mTransferir('${midOrigem}')">← Voltar</button>
+        </div>
+    `);
   } else {
     // JUNTAR (A mesa de destino está ocupada)
-    if (!await customConfirm(`JUNTAR a Mesa ${mOrigem.numero} com a Mesa ${mDestino.numero}?\n\nTodos os itens e pagamentos serão passados para a Mesa ${mDestino.numero} e a Mesa ${mOrigem.numero} ficará livre.`, 'Sim, juntar')) return;
+    if (!await customConfirm(`JUNTAR o(a) ${lblOrigem} ${mOrigem.numero} com o(a) ${lblDestino} ${mDestino.numero}?\n\nTodos os itens e pagamentos serão passados para o(a) ${lblDestino} ${mDestino.numero} e o(a) ${lblOrigem} ${mOrigem.numero} ficará livre.`, 'Sim, juntar')) return;
 
     // 1. Move os itens para a comanda de destino
     const itensOrigem = S.itens[cOrigem.id] || [];
@@ -898,7 +905,7 @@ async function doTransferir(midOrigem, midDestino) {
         cDestino.pagamentos_parciais.push(...cOrigem.pagamentos_parciais);
     }
 
-    cDestino.observacao = ((cDestino.observacao || '') + ` (Juntou com Mesa ${mOrigem.numero})`).trim();
+    cDestino.observacao = ((cDestino.observacao || '') + ` (Juntou com ${lblOrigem} ${mOrigem.numero})`).trim();
 
     await idbPut('comandas', cDestino);
     if (S.online) { 
@@ -921,10 +928,59 @@ async function doTransferir(midOrigem, midDestino) {
     await idbDel('comandas', cOrigem.id);
     if (S.online) { try { await sbDel('comandas', `id=eq.${cOrigem.id}`); } catch(e){} }
 
-    await registrarLog('Juntar Mesas', `Juntou Mesa ${mOrigem.numero} na Mesa ${mDestino.numero}`);
-    closeModal(); toast(`Mesas juntas com sucesso!`); render(); mComanda(midDestino);
+    await registrarLog('Juntar', `Juntou ${lblOrigem} ${mOrigem.numero} no(a) ${lblDestino} ${mDestino.numero}`);
+    closeModal(); toast(`Juntado com sucesso!`); render(); mComanda(midDestino);
   }
 }
+
+window.execMudar = async function(midOrigem, midDestino) {
+  const cOrigem = getComanda(midOrigem);
+  const mOrigem = getMesa(midOrigem);
+  const mDestino = getMesa(midDestino);
+  const lblOrigem = mOrigem.categoria === 'Bistro' ? 'Bistrô' : 'Mesa';
+  const lblDestino = mDestino.categoria === 'Bistro' ? 'Bistrô' : 'Mesa';
+
+  cOrigem.mesa_id = midDestino;
+  await idbPut('comandas', cOrigem);
+  if (S.online) { try { await sbPatch('comandas', `id=eq.${cOrigem.id}`, { mesa_id: midDestino }); } catch(e){} }
+  
+  await registrarLog('Mudar', `Moveu de ${lblOrigem} ${mOrigem.numero} para ${lblDestino} ${mDestino.numero}`);
+  closeModal(); toast(`Alterado para ${lblDestino} ${mDestino.numero}`); render(); mComanda(midDestino);
+};
+
+window.execJuntarFantasma = async function(midOrigem, midDestino) {
+  const mOrigem = getMesa(midOrigem);
+  const mDestino = getMesa(midDestino);
+  const cOrigem = getComanda(midOrigem);
+  const lblOrigem = mOrigem.categoria === 'Bistro' ? 'Bistrô' : 'Mesa';
+  const lblDestino = mDestino.categoria === 'Bistro' ? 'Bistrô' : 'Mesa';
+
+  // Cria a comanda "fantasma" na mesa puxada para bloqueá-la no salão
+  const comandaFantasma = { 
+      id: uid(), 
+      mesa_id: midDestino, 
+      abertura_at: new Date().toISOString(), 
+      status: 'aberta', 
+      couvert_valor: 0, 
+      couvert_quantidade: 0, 
+      desconto: 0, 
+      total: null, 
+      observacao: `(Mesa vinculada ao ${lblOrigem} ${mOrigem.numero})`, 
+      nome_cliente: cOrigem.nome_cliente || '' 
+  };
+  S.comandas.push(comandaFantasma);
+  S.itens[comandaFantasma.id] = [];
+  await idbPut('comandas', comandaFantasma);
+  if (S.online) { try { await sbPost('comandas', comandaFantasma); } catch(e){} }
+
+  // Atualiza a mesa principal com a anotação para o garçom lembrar
+  cOrigem.observacao = ((cOrigem.observacao || '') + ` (+ ${lblDestino} ${mDestino.numero})`).trim();
+  await idbPut('comandas', cOrigem);
+  if (S.online) { try { await sbPatch('comandas', `id=eq.${cOrigem.id}`, { observacao: cOrigem.observacao }); } catch(e){} }
+
+  await registrarLog('Juntar Mesas', `Vinculou ${lblDestino} ${mDestino.numero} ao(à) ${lblOrigem} ${mOrigem.numero}`);
+  closeModal(); toast(`${lblDestino} ${mDestino.numero} anexado(a)!`); render(); mComanda(midOrigem);
+};
 
 // ══════════════════════════════════════════════
 // MODAL: ADICIONAR ITEM (COM HAPPY HOUR E FICHA)
