@@ -1194,6 +1194,9 @@ window.doPagamentoPessoaDivisao = async function(idx, mid) {
 
 async function doFechar(mid) {
   const c = getComanda(mid); if (!c) return;
+  const mOrigem = getMesa(mid);
+  const lblOrigem = mOrigem ? (mOrigem.categoria === 'Bistro' ? 'Bistrô' : 'Mesa') : 'Mesa';
+  const numeroOrigem = mOrigem ? mOrigem.numero : '';
   const elQty = document.getElementById('splitQty');
   const n = elQty ? (parseInt(elQty.value)||1) : 1;
   const desc = parseFloat(String(document.getElementById('fmdesc')?.value||'0').replace(',','.'))||0;
@@ -1229,19 +1232,37 @@ async function doFechar(mid) {
         const pIdx = parseInt(btn.dataset.p); 
         const valStr = splitInputs[pIdx] ? splitInputs[pIdx].value : (restante/n);
         const pVal = parseFloat(String(valStr).replace(',', '.'));
-        const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:pVal, forma_pagamento:btn.dataset.v, descricao:'Mesa ' + getMesa(mid).numero + ' (pessoa ' + (parseInt(btn.dataset.p)+1) + '/' + n + ')', comanda_id:c.id, created_at:new Date().toISOString() };
+        const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:pVal, forma_pagamento:btn.dataset.v, descricao:`${lblOrigem} ${numeroOrigem} (pessoa ${parseInt(btn.dataset.p)+1}/${n})`, comanda_id:c.id, created_at:new Date().toISOString() };
         await idbPut('caixa_movimentacoes', mov);
         if (S.online) { try { await sbPost('caixa_movimentacoes', mov); }catch(e){} }
       }
     } else {
-      const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:restante, forma_pagamento:forma, descricao:`Mesa ${getMesa(mid).numero}`, comanda_id:c.id, created_at:new Date().toISOString() };
+      const mov = { id:uid(), sessao_id:S.caixaSessao.id, tipo:'entrada', valor:restante, forma_pagamento:forma, descricao:`${lblOrigem} ${numeroOrigem}`, comanda_id:c.id, created_at:new Date().toISOString() };
       await idbPut('caixa_movimentacoes', mov);
       if (S.online) { try { await sbPost('caixa_movimentacoes', mov); }catch(e){} }
     }
   }
-  await registrarLog('Fechar mesa', `Mesa ${getMesa(mid).numero} fechada`);
+  await registrarLog('Fechar', `${lblOrigem} ${numeroOrigem} fechada(o)`);
+  
+  // ==========================================
+  // LIBERAR MESAS FANTASMAS AUTOMATICAMENTE
+  // ==========================================
+  const tagVinculo = `(Mesa vinculada ao ${lblOrigem} ${numeroOrigem})`;
+  const fantasmas = S.comandas.filter(x => x.id !== c.id && x.status === 'aberta' && x.observacao && x.observacao.includes(tagVinculo));
+  
+  for (const f of fantasmas) {
+     f.status = 'fechada';
+     f.fechamento_at = new Date().toISOString();
+     f.total = 0;
+     f.forma_pagamento = 'vinculada';
+     await idbPut('comandas', f);
+     if (S.online) { try { await sbPatch('comandas',`id=eq.${f.id}`, {status: f.status, fechamento_at: f.fechamento_at, total: 0, forma_pagamento: f.forma_pagamento}); } catch(e){} }
+     S.comandas = S.comandas.filter(x => x.id !== f.id);
+     delete S.itens[f.id];
+  }
+
   S.comandas = S.comandas.filter(x=>x.id!==c.id); delete S.itens[c.id];
-  closeModal(); toast(`Mesa ${getMesa(mid).numero} fechada!`); render();
+  closeModal(); toast(`${lblOrigem} ${numeroOrigem} e mesas vinculadas fechadas!`); render();
 }
 function mAddMesa() { go('config'); setTimeout(()=>toast('Use "+ Mesa" ou "+ Bistrô" em Configurações 👇'),200); }
 
